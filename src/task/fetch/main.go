@@ -4,21 +4,21 @@ import (
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/company"
 )
 
 func main() {
 	log.Println("i am fetch")
-	fetch_kr()
+	kr_company()
 }
 
-func fetch_kr() {
-	old := kr.SelectAll()
+func kr_company() {
+	old := company.SelectAll()
 	log.Println("len(old_companys)=", len(old))
-	request_krx := kr.Req_krx{}
+	request_krx := company.Req_krx{}
 	request_krx.Run()
 
-	krx_convert := kr.Convert{Old: old}
+	krx_convert := company.Convert{Old: old}
 	krx_convert.Run()
 
 	var list []model.Company
@@ -27,6 +27,6 @@ func fetch_kr() {
 	}
 
 	log.Println("len(old_companys)=", len(old))
-	kr_insert := kr.Insert{Company: list}
+	kr_insert := company.Insert{Company: list}
 	kr_insert.Run()
 }
