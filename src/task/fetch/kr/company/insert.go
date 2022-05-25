@@ -1,4 +1,4 @@
-package kr
+package company
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,17 +19,12 @@ type Insert struct {
 func (o *Insert) Run() {
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
-	companyCollection := client.Database("test").Collection("company")
+	companyCollection := client.Database(config.DB_PUB).Collection(config.DB_PUB_COLL_COMPANY)
 	//var ui []interface{}
 	models := []mongo.WriteModel{}
 
 	for _, v := range o.Company {
-		log.Println(v.ID)
-		//ui = append(ui, v)
-		var vi interface{}
-		vi = v
-
-		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"_id": v.ID, "code": v.Code}).SetUpsert(true).SetReplacement(vi))
+		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"_id": v.ID, "code": v.Code}).SetUpsert(true).SetReplacement(v))
 	}
 
 	opts := options.BulkWrite().SetOrdered(false)
@@ -37,15 +33,8 @@ func (o *Insert) Run() {
 		log.Fatal(err)
 	}
 	fmt.Printf(
-		"inserted %v and deleted %v documents\n",
-		res.InsertedCount,
+		"ModifiedCount %v and deleted %v documents\n",
+		res.ModifiedCount,
 		res.DeletedCount)
-	// result, err := companyCollection.InsertMany(ctx, ui)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("%d documents inserted with IDs:\n", len(result.InsertedIDs))
-	// for _, id := range result.InsertedIDs {
-	// 	fmt.Printf("\t%s\n", id)
-	// }
+
 }

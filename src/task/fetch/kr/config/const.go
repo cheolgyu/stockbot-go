@@ -1,4 +1,4 @@
-package kr
+package config
 
 import (
 	"os"
@@ -34,8 +34,10 @@ const FILE_FLAG_TRUNC = os.O_RDWR | os.O_CREATE | os.O_TRUNC
 
 const INFO_NAME_UPDATED = "updated_stock_write"
 
-var PRICE_DATE_FORMAT = "20060102"
-var PRICE_DEFAULT_START_DATE = ""
+//custom := now.Format("2006-01-02 15:04:05")
+const PRICE_DATE_FORMAT = "20060102"
+
+const PRICE_DEFAULT_START_DATE = "19560303"
 
 const XLSX_SPLIT = "!,_"
 
@@ -45,7 +47,11 @@ var Config map[string]int
 
 func init() {
 	DownloadCompany = false
-	DownloadPrice = false
+	DownloadPrice = true
 
-	PRICE_DEFAULT_START_DATE = "19560303" //time.Now().AddDate(-3, 0, 0).Format(PRICE_DATE_FORMAT)
 }
+
+const DB_PUB = "test"
+const DB_PUB_COLL_COMPANY = "company"
+const DB_INFO = "info"
+const DB_PUB_COLL_NOTE = "note"

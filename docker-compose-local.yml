@@ -12,6 +12,7 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
+      TZ: Asia/Seoul
   # mongo-express:
   #   image: mongo-express
   #   restart: always
