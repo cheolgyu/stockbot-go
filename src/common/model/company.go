@@ -1,15 +1,19 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Company struct {
 	ID     primitive.ObjectID `bson:"_id"`
 	Code   string             `bson:"code"`
 	Name   string             `bson:"name"`
 	Market string             `bson:"market"`
+
 	Detail CompanyDetail
 	State  CompanyState
 }
+
 type CompanyDetail struct {
 	//Company `bson:"company"`
 

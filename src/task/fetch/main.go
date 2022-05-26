@@ -5,11 +5,20 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/kr/company"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/price"
 )
 
 func main() {
 	log.Println("i am fetch")
 	kr_company()
+	kr_price()
+}
+
+func kr_price() {
+	//list := price.SelectCodeAll()
+	sd, ed := price.StartEndDate()
+	codes := price.SelectCodeAll()
+
 }
 
 func kr_company() {
