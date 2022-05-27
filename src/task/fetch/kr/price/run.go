@@ -12,8 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var START_DT_PRICE_DATE = 19560303
-
 type Price struct {
 	companys []model.Company
 }
