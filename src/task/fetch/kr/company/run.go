@@ -9,7 +9,7 @@ import (
 type Run struct{}
 
 func (o *Run) Run() {
-	old := SelectAll()
+	old := company_map()
 	log.Println("len(old_companys)=", len(old))
 	request_krx := Req_krx{}
 	request_krx.Run()

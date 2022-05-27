@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common"
-	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,7 +16,7 @@ func StartEndDate() (start string, end string) {
 
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
-	coll := client.Database(config.DB_PUB).Collection(config.DB_PUB_COLL_NOTE)
+	coll := client.Database(doc.DB_PUB).Collection(doc.DB_PUB_COLL_NOTE)
 	opts := options.Find().SetProjection(bson.M{"kr_price_updated_date": 1})
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
 	if err != nil {
@@ -44,21 +44,4 @@ func StartEndDate() (start string, end string) {
 	fmt.Println("end=", end)
 
 	return start, end
-}
-
-func SelectCodeAll() []model.Company {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
-	cursor, err := client.Database(config.DB_PUB).Collection(config.DB_PUB_COLL_COMPANY).Find(ctx, bson.M{})
-	defer cursor.Close(ctx)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	var list []model.Company
-
-	cursor.All(ctx, &list)
-
-	fmt.Println("select company_list len=", len(list))
-	return list
 }
