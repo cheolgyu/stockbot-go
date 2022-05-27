@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/cheolgyu/stockbot/src/fetch/kr"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 )
 
 type Req_krx struct {
@@ -22,26 +22,26 @@ type Req_krx struct {
 }
 
 func (o *Req_krx) init() {
-	if o.Object == kr.COMPANY_DETAIL {
-		o.saveNm = kr.DOWNLOAD_DIR_COMPANY_DETAIL + kr.DOWNLOAD_FILENAME_COMPANY_DETAIL
-		o.urlCode = kr.DOWNLOAD_URL_COMPANY_DETAIL_CODE
-		o.urlData = kr.DOWNLOAD_URL_COMPANY_DETAIL_DATA
-		o.codeReqBody = kr.DOWNLOAD_URL_COMPANY_DETAIL_PARAMS
-	} else if o.Object == kr.COMPANY_STATE {
-		o.saveNm = kr.DOWNLOAD_DIR_COMPANY_STATE + kr.DOWNLOAD_FILENAME_COMPANY_STATE
-		o.urlCode = kr.DOWNLOAD_URL_COMPANY_STATE_CODE
-		o.urlData = kr.DOWNLOAD_URL_COMPANY_STATE_DATA
-		o.codeReqBody = kr.DOWNLOAD_URL_COMPANY_STATE_PARAMS
+	if o.Object == config.COMPANY_DETAIL {
+		o.saveNm = config.DOWNLOAD_DIR_COMPANY_DETAIL + config.DOWNLOAD_FILENAME_COMPANY_DETAIL
+		o.urlCode = config.DOWNLOAD_URL_COMPANY_DETAIL_CODE
+		o.urlData = config.DOWNLOAD_URL_COMPANY_DETAIL_DATA
+		o.codeReqBody = config.DOWNLOAD_URL_COMPANY_DETAIL_PARAMS
+	} else if o.Object == config.COMPANY_STATE {
+		o.saveNm = config.DOWNLOAD_DIR_COMPANY_STATE + config.DOWNLOAD_FILENAME_COMPANY_STATE
+		o.urlCode = config.DOWNLOAD_URL_COMPANY_STATE_CODE
+		o.urlData = config.DOWNLOAD_URL_COMPANY_STATE_DATA
+		o.codeReqBody = config.DOWNLOAD_URL_COMPANY_STATE_PARAMS
 	}
 }
 func (o *Req_krx) Run() {
 
-	if kr.DownloadCompany {
-		detail := Req_krx{Object: kr.COMPANY_DETAIL}
+	if config.DownloadCompany {
+		detail := Req_krx{Object: config.COMPANY_DETAIL}
 		detail.init()
 		detail.down_code()
 		detail.down_file()
-		state := Req_krx{Object: kr.COMPANY_STATE}
+		state := Req_krx{Object: config.COMPANY_STATE}
 		state.init()
 		state.down_code()
 		state.down_file()

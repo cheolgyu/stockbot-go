@@ -1,4 +1,4 @@
-package kr
+package config
 
 import (
 	"os"

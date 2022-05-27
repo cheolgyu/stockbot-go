@@ -6,7 +6,7 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -19,7 +19,7 @@ type Insert struct {
 func (o *Insert) Run() {
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
-	companyCollection := client.Database(kr.DB_PUB).Collection(kr.DB_PUB_COLL_COMPANY)
+	companyCollection := client.Database(config.DB_PUB).Collection(config.DB_PUB_COLL_COMPANY)
 	//var ui []interface{}
 	models := []mongo.WriteModel{}
 
@@ -36,12 +36,5 @@ func (o *Insert) Run() {
 		"ModifiedCount %v and deleted %v documents\n",
 		res.ModifiedCount,
 		res.DeletedCount)
-	// result, err := companyCollection.InsertMany(ctx, ui)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("%d documents inserted with IDs:\n", len(result.InsertedIDs))
-	// for _, id := range result.InsertedIDs {
-	// 	fmt.Printf("\t%s\n", id)
-	// }
+
 }

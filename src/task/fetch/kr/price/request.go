@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 )
 
 type NaverChart struct {
@@ -25,12 +25,12 @@ type NaverChart struct {
 }
 
 func (o *NaverChart) init() {
-	if o.Code.Code_type == kr.Config["stock"] {
-		o.fnm = kr.DOWNLOAD_DIR_PRICE + o.Code.Code
-	} else if o.Code.Code_type == kr.Config["market"] {
-		o.fnm = kr.DOWNLOAD_DIR_MARKET + o.Code.Code
+	if o.Code.Code_type == config.Config["stock"] {
+		o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+	} else if o.Code.Code_type == config.Config["market"] {
+		o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
 	}
-	o.url = fmt.Sprintf(kr.DOWNLOAD_URL_PRICE, o.Code.Code, o.StartDate, o.EndDate)
+	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.StartDate, o.EndDate)
 
 }
 
@@ -38,7 +38,7 @@ func (o *NaverChart) Run() ([]model.PriceMarket, error) {
 	var err error = nil
 
 	o.init()
-	if kr.DownloadPrice {
+	if config.DownloadPrice {
 		err_down := o.Download()
 		return nil, err_down
 	}
@@ -83,7 +83,7 @@ func (o *NaverChart) Parse() ([]model.PriceMarket, error) {
 				// 	//panic(e)
 				// 	return nil, e
 				// }
-				// ddd, e := strconv.ParseInt(kr.PRICE_DEFAULT_START_DATE, 0, 64)
+				// ddd, e := strconv.ParseInt(config.PRICE_DEFAULT_START_DATE, 0, 64)
 				// if e != nil {
 				// 	return nil, e
 				// }

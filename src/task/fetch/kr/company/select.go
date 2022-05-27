@@ -6,14 +6,14 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func SelectAll() map[string]model.Company {
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
-	cursor, err := client.Database(kr.DB_PUB).Collection(kr.DB_PUB_COLL_COMPANY).Find(ctx, bson.M{})
+	cursor, err := client.Database(config.DB_PUB).Collection(config.DB_PUB_COLL_COMPANY).Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
