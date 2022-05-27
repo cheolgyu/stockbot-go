@@ -8,7 +8,7 @@ import (
 
 type Run struct{}
 
-func (o *Run) Exe() {
+func (o *Run) Run() {
 	old := SelectAll()
 	log.Println("len(old_companys)=", len(old))
 	request_krx := Req_krx{}

@@ -2,19 +2,12 @@ package kr
 
 import (
 	"github.com/cheolgyu/stockbot/src/fetch/kr/company"
+	"github.com/cheolgyu/stockbot/src/fetch/kr/price"
 )
 
 func Run() {
 	cr := company.Run{}
-	cr.Exe()
-	// kr_price()
+	cr.Run()
+	pr := price.Run{}
+	pr.Run()
 }
-
-// func kr_price() {
-
-// 	//list := price.SelectCodeAll()
-// 	sd, ed := price.StartEndDate()
-// 	codes := price.SelectCodeAll()
-// 	price.NaverChart{}
-
-// }
