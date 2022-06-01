@@ -6,23 +6,35 @@ import (
 	"github.com/cheolgyu/stockbot/src/common/model"
 )
 
-type Run struct{}
+/*
+기존 목록 조회
+new 목록 다운 및 변환
+기존 목록에 new 목록으로 바꾸기
+replace방식으로 upsert설정 후 저장
+*/
+type Run struct {
+	old_list map[string]model.Company
+	downlad  Req_krx
+	convert  Convert
+	insert   Insert
+}
 
 func (o *Run) Run() {
-	old := company_map()
-	log.Println("len(old_companys)=", len(old))
-	request_krx := Req_krx{}
-	request_krx.Run()
+	o.old_list = company_map()
+	log.Println("len(old_companys)=", len(o.old_list))
 
-	krx_convert := Convert{Old: old}
-	krx_convert.Run()
+	o.downlad = Req_krx{}
+	o.downlad.Run()
+
+	o.convert.Old = o.old_list
+	o.convert.Run()
 
 	var list []model.Company
-	for _, v := range old {
-		list = append(list, old[v.Code.Code])
+	for _, v := range o.old_list {
+		list = append(list, o.old_list[v.Code.Code])
 	}
 
-	log.Println("len(old_companys)=", len(old))
-	kr_insert := Insert{Company: list}
-	kr_insert.Run()
+	log.Println("len(old_companys)=", len(o.old_list))
+	o.insert.Company = list
+	o.insert.Run()
 }

@@ -33,7 +33,7 @@ func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
 		//new code
 		if is_detail {
 			om = upsert_cmp
-			om.Code.Id = primitive.NewObjectID()
+			om.Id = primitive.NewObjectID()
 		} else {
 			//detail 파일에는 있고 state 파일에만 있는 코드 등장
 			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")

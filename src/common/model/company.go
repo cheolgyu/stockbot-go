@@ -1,8 +1,11 @@
 package model
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Company struct {
-	Code   Code   `bson:"inline"`
-	Market string `bson:"market"`
+	Id     primitive.ObjectID `bson:"_id"`
+	Code   Code               `bson:"inline"`
+	Market string             `bson:"market"`
 	Detail CompanyDetail
 	State  CompanyState
 }

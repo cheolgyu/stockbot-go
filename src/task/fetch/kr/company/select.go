@@ -6,7 +6,7 @@ import (
 )
 
 func company_map() map[string]model.Company {
-	list := doc.GetCompanyCodes()
+	list := doc.GetCompany()
 	company_map := make(map[string]model.Company)
 
 	for _, v := range list {

@@ -1,6 +1,6 @@
 # stockbot
 
-stockbot/src/task/kr/company
+stockbot/src/task/fetch/kr/company
 ---
 1. DB 조회: 기존 회사
 2. 엑셀다운: 기존 회사 갱신정보, new 회사
@@ -10,7 +10,7 @@ stockbot/src/task/kr/company
 4. 저장: replace 와 upsert로 처리
 ---
 
-stockbot/src/task/kr/price
+stockbot/src/task/fetch/kr/price
 ---
 1. 네이버차트 가격데이터 조회시 필요한것 조회기간+code
 2. 조회시간

@@ -1,11 +1,8 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Code struct {
-	Id   primitive.ObjectID `bson:"_id"`
-	Code string             `bson:"code"`
-	Name string             `bson:"name"`
+	Code string `bson:"code"`
+	Name string `bson:"name"`
 }
 
 type Config struct {

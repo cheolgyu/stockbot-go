@@ -17,6 +17,7 @@ func Connect() (*mongo.Client, context.Context) {
 	}
 	// 몽고DB 연결
 	clientOptions := options.Client().ApplyURI(MyEnv["MONGO_DB_URL"]).SetAuth(credential)
+
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)

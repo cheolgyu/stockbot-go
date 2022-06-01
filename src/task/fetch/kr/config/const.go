@@ -47,6 +47,6 @@ var Config map[string]int
 
 func init() {
 	DownloadCompany = false
-	DownloadPrice = true
+	DownloadPrice = false
 
 }
