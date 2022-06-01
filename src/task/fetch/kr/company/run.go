@@ -19,7 +19,7 @@ func (o *Run) Run() {
 
 	var list []model.Company
 	for _, v := range old {
-		list = append(list, old[v.Code])
+		list = append(list, old[v.Code.Code])
 	}
 
 	log.Println("len(old_companys)=", len(old))

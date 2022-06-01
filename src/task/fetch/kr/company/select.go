@@ -10,7 +10,7 @@ func company_map() map[string]model.Company {
 	company_map := make(map[string]model.Company)
 
 	for _, v := range list {
-		company_map[v.Code] = v
+		company_map[v.Code.Code] = v
 	}
 
 	return company_map

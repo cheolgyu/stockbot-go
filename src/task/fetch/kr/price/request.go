@@ -25,11 +25,11 @@ type NaverChart struct {
 }
 
 func (o *NaverChart) init() {
-	if o.Code.Code_type == config.Config["stock"] {
-		o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
-	} else if o.Code.Code_type == config.Config["market"] {
-		o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
-	}
+	// if o.Code.Code.Code_type == config.Config["stock"] {
+	// 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+	// } else if o.Code.Code.Code_type == config.Config["market"] {
+	// 	o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
+	// }
 	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.StartDate, o.EndDate)
 
 }

@@ -21,7 +21,7 @@ func (o *Convert) Run() {
 }
 
 func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
-	om, exist := o.Old[upsert_cmp.Code]
+	om, exist := o.Old[upsert_cmp.Code.Code]
 
 	if exist {
 		if is_detail {
@@ -33,7 +33,7 @@ func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
 		//new code
 		if is_detail {
 			om = upsert_cmp
-			om.ID = primitive.NewObjectID()
+			om.Code.Id = primitive.NewObjectID()
 		} else {
 			//detail 파일에는 있고 state 파일에만 있는 코드 등장
 			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")
@@ -47,7 +47,7 @@ func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
 		om.State = upsert_cmp.State
 	}
 
-	o.Old[upsert_cmp.Code] = om
+	o.Old[upsert_cmp.Code.Code] = om
 }
 
 func (o *Convert) run_state() {
@@ -112,9 +112,9 @@ func stringToCompanyDetail(str string) model.Company {
 
 	cmp_detail := model.CompanyDetail{}
 	cmp_detail.Full_code = arr[0]
-	cmp.Code = arr[1]
+	cmp.Code.Code = arr[1]
 	cmp_detail.Full_name_kr = arr[2]
-	cmp.Name = arr[3]
+	cmp.Code.Name = arr[3]
 
 	cmp_detail.Full_name_eng = arr[4]
 
@@ -141,8 +141,8 @@ func stringToCompanyState(str string) model.Company {
 
 	txt_replace := strings.NewReplacer("'", " ")
 
-	ic.Code = txt_replace.Replace(arr[0])
-	ic.Name = txt_replace.Replace(arr[1])
+	ic.Code.Code = txt_replace.Replace(arr[0])
+	ic.Code.Name = txt_replace.Replace(arr[1])
 	o.Stop = ox(arr[2])
 	o.Clear = ox(arr[3])
 	o.Managed = ox(arr[4])
