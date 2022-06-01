@@ -2,10 +2,12 @@ package price
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"log"
@@ -15,29 +17,30 @@ import (
 	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 )
 
-type NaverChart struct {
-	StartDate string
-	EndDate   string
+type naverChart struct {
+	startDate string
+	endDate   string
 	model.Code
 
 	url string
 	fnm string
 }
 
-func (o *NaverChart) init() {
+func (o *naverChart) ready() {
 	// if o.Code.Code.Code_type == config.Config["stock"] {
 	// 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
 	// } else if o.Code.Code.Code_type == config.Config["market"] {
 	// 	o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
 	// }
-	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.StartDate, o.EndDate)
+	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.startDate, o.endDate)
 
 }
 
-func (o *NaverChart) Run() ([]model.PriceMarket, error) {
+func (o *naverChart) Run() ([]model.PriceMarket, error) {
 	var err error = nil
 
-	o.init()
+	o.ready()
 	if config.DownloadPrice {
 		err_down := o.Download()
 		return nil, err_down
@@ -47,7 +50,7 @@ func (o *NaverChart) Run() ([]model.PriceMarket, error) {
 	return res, err
 }
 
-func (o *NaverChart) Parse() ([]model.PriceMarket, error) {
+func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 	var res []model.PriceMarket
 
 	file, err := os.Open(o.fnm)
@@ -89,8 +92,7 @@ func (o *NaverChart) Parse() ([]model.PriceMarket, error) {
 				// }
 
 				//if dd > ddd {
-				p := model.PriceMarket{}
-				p.StringToPrice(re_str)
+				p := stringToPrice(re_str)
 				res = append(res, p)
 
 				//}
@@ -103,7 +105,7 @@ func (o *NaverChart) Parse() ([]model.PriceMarket, error) {
 
 }
 
-func (o *NaverChart) Download() error {
+func (o *naverChart) Download() error {
 	req, err := http.NewRequest("GET", o.url, nil)
 	if err != nil {
 		log.Println("Download NewRequest 에러")
@@ -136,4 +138,103 @@ func (o *NaverChart) Download() error {
 		return err
 	}
 	return err
+}
+
+func convert_g4(num int) (int, error) {
+	var err error
+	res := 0
+	// select   case  when mm < 4 then 1 when mm < 7 then 2  when mm < 10 then 3 else 4 end as q4
+	if num < 4 {
+		res = 1
+	} else if num < 7 {
+		res = 2
+	} else if num < 10 {
+		res = 3
+	} else if num < 13 {
+		res = 4
+	} else {
+
+		err = errors.New(fmt.Sprintf(" 분기 변환 오류: %v", num))
+	}
+
+	return res, err
+}
+
+func parseUint(str string) (int, error) {
+	// 08 일경우 오류 발생.
+	res, err := strconv.Atoi(str)
+	return int(res), err
+}
+
+func stringToPrice(str string) model.PriceMarket {
+	p := model.PriceMarket{}
+	arr := strings.Split(str, ",")
+	var s0 = arr[0]
+
+	if res, err := parseUint(s0); err == nil {
+		p.Dt = res
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := parseUint(s0[:4]); err == nil {
+		p.Dt_y = res
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := parseUint(s0[4:6]); err == nil {
+		p.Dt_m = res
+	} else if err != nil {
+		log.Println("err:", str)
+		log.Println("err:", str)
+		panic(err)
+	}
+
+	if res, err := parseUint(s0[4:6]); err == nil {
+		if res, err := convert_g4(res); err == nil {
+			p.Dt_q4 = res
+		} else if err != nil {
+			panic(err)
+		}
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := strconv.ParseFloat(arr[1], 32); err == nil {
+		p.OpenPrice = float32(res)
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := strconv.ParseFloat(arr[2], 32); err == nil {
+		p.HighPrice = float32(res)
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := strconv.ParseFloat(arr[3], 32); err == nil {
+		p.LowPrice = float32(res)
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := strconv.ParseFloat(arr[4], 32); err == nil {
+		p.ClosePrice = float32(res)
+	} else if err != nil {
+		panic(err)
+	}
+
+	if res, err := parseUint(arr[5]); err == nil {
+		p.Volume = res
+	} else if err != nil {
+		panic(err)
+	}
+
+	str_fr := strings.Replace(arr[6], ",", "", -1)
+	if str_fr == "" {
+		str_fr = "0"
+	}
+	p.ForeignerBurnoutRate = str_fr
+	return p
 }

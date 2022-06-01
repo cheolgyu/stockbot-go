@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func StartEndDate() (start string, end string) {
+func startEndDate() (start string, end string) {
 
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
