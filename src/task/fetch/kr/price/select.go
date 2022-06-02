@@ -17,7 +17,7 @@ func startEndDate() (start string, end string) {
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
 	coll := client.Database(doc.DB_PUB).Collection(doc.DB_PUB_COLL_NOTE)
-	opts := options.Find().SetProjection(bson.M{doc.DB_DATA_COLL_PRICE_UPDATED_KR: 1})
+	opts := options.Find().SetProjection(bson.M{doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 1})
 	cursor, err := coll.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		log.Fatal(err)
@@ -28,7 +28,7 @@ func startEndDate() (start string, end string) {
 	cursor.All(ctx, &data)
 	if len(data) == 0 {
 		log.Println("kr_price_updated_date 신규")
-		result, err := coll.InsertOne(ctx, bson.M{doc.DB_DATA_COLL_PRICE_UPDATED_KR: config.PRICE_DEFAULT_START_DATE})
+		result, err := coll.InsertOne(ctx, bson.M{doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: config.PRICE_DEFAULT_START_DATE})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -36,7 +36,7 @@ func startEndDate() (start string, end string) {
 		fmt.Println("1.start=", config.PRICE_DEFAULT_START_DATE)
 	} else {
 
-		start = data[0][doc.DB_DATA_COLL_PRICE_UPDATED_KR].(string)
+		start = data[0][doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR].(string)
 		log.Println("kr_price_updated_date 존재하는 값 ", start)
 	}
 

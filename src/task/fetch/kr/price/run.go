@@ -60,7 +60,7 @@ func (o *Run) Run() {
 
 	}
 
-	res, err := doc.UpdateNoteOne(doc.DB_DATA_COLL_PRICE_UPDATED_KR, o.end)
+	res, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, o.end)
 	if err != nil {
 		panic(err.Error())
 	}
