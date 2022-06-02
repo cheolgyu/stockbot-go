@@ -53,3 +53,30 @@
       + DB_PUB
         + DB_PUB_COLL_NOTE
           + DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 가격정보 업데이트 일자
+
+
+### stockbot/src/task/assemble/line/bound 
+   + goal
+     + 코드의 종시저고가별 누적 몇퍼센트인지 찾기
+   + process
+      ---
+      1. 코드목록조회
+      2. 코드별 종시저고가별 마지막 바운드점의 일자조회
+      3. 마지막 바운드점의 일자 이후의 가격목록 조회
+      4. 마지막 바운드점의 일자 이후부터 가격목록으로 바운스점 찾기
+      5. 바운스점 저장 
+     
+      ---
+      ---
+      1. 코드목록조회
+      2. 코드별 종시저고가별 마지막 바운드점의 일자조회
+      3. 마지막 바운드점의 일자 이후의 가격목록 조회
+      4. 마지막 바운드점의 일자 이후부터 가격목록으로 바운스점 찾기
+      5. 바운스점 저장 
+     
+      ---      
+   + 테이블
+     + DB_PUB
+        + DB_PUB_COLL_COMPANY
+      + DB_DATA
+        + DB_DATA_COLL_BOUND_POINT
