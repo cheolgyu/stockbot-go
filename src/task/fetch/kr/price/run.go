@@ -28,6 +28,7 @@ type Run struct {
 func (o *Run) Run() {
 	create_index()
 	o.code = doc.GetCodes()
+	o.code = append(o.code, add_market()...)
 	o.start, o.end = startEndDate()
 
 	client, ctx := common.Connect()
@@ -64,6 +65,19 @@ func (o *Run) Run() {
 		panic(err.Error())
 	}
 	log.Println("doc.UpdateNoteOne:", res)
+}
+
+func add_market() []model.Code {
+	kr_market := []model.Code{
+		{
+			Code: "KOSPI",
+			Name: "코스피",
+		}, {
+			Code: "KOSDAQ",
+			Name: "코스닥",
+		},
+	}
+	return kr_market
 }
 
 //https://christiangiacomi.com/posts/mongodb-index-using-go/
