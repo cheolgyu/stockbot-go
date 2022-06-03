@@ -27,8 +27,8 @@ func Connect() (*mongo.Client, context.Context) {
 	// 내용을 적을 부분
 
 	// 몽고DB 연결 끊기
-	uesrsCollection := client.Database("test").Collection("users")
-	fmt.Println(uesrsCollection)
+	// uesrsCollection := client.Database("test").Collection("users")
+	// fmt.Println(uesrsCollection)
 
 	//defer client.Disconnect(ctx)
 
