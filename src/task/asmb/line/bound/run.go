@@ -24,9 +24,9 @@ func (o *Run) Run() {
 
 			bline.GetStartingPoint()
 			bline.GetAfterStartingPointPipeline()
-			log.Println("bline.StartingPoint", bline.StartingPoint)
-			log.Println("bline.AfterStartingPoint ", bline.AfterStartingPoint[:10])
-			log.Println("bline.AfterStartingPoint len", len(bline.AfterStartingPoint))
+			log.Println("bline.StartingPoint", bline.startingPoint)
+			log.Println("bline.AfterStartingPoint ", bline.afterStartingPoint[:3])
+			log.Println("bline.AfterStartingPoint len", len(bline.afterStartingPoint))
 			//bound point 찾기
 		}
 	}
