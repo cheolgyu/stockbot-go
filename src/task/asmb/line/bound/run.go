@@ -27,6 +27,9 @@ func (o *Run) Run() {
 			log.Println("bline.StartingPoint", bline.startingPoint)
 			log.Println("bline.AfterStartingPoint ", bline.afterStartingPoint[:3])
 			log.Println("bline.AfterStartingPoint len", len(bline.afterStartingPoint))
+			bline.SetBoundPoint()
+			log.Println("bline.SetBoundPoint len", len(bline.boundPoint))
+			log.Println("bline.SetBoundPoint len", bline.boundPoint[:3])
 			//bound point 찾기
 		}
 	}

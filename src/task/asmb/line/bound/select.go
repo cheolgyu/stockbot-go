@@ -66,23 +66,57 @@ func (o *BoundLine) GetAfterStartingPointPipeline() {
 }
 
 func (o *BoundLine) SetBoundPoint() {
-	if len(o.afterStartingPoint) > 2 {
+
+	var p1 model.Point = o.startingPoint
+	if p1.X == 0 {
+		p1 = o.afterStartingPoint[0]
+		o.afterStartingPoint = o.afterStartingPoint[1:]
+	}
+
+	count_p2 := len(o.afterStartingPoint)
+	if count_p2 < 2 {
 		return
 	}
 
-	j := o.startingPoint
-	d := 0
+	var prev_direction model.Direction
 
-	for i := 0; i < len(o.afterStartingPoint); i++ {
-		v := o.afterStartingPoint[i]
+	var duration uint
 
-		if j.Y < v.Y {
-			d = model.Increase.Int()
-		} else if j.Y > v.Y {
-			d = model.Decrease.Int()
+	for i := 0; i < count_p2; i++ {
+
+		var cur_direction model.Direction
+
+		p2 := o.afterStartingPoint[i]
+
+		if p1.Y < p2.Y {
+			cur_direction = model.Increase
+		} else if p1.Y > p2.Y {
+			cur_direction = model.Decrease
 		} else {
-			d = model.Constant.Int()
+			cur_direction = model.Constant
 		}
+
+		chage_direction := prev_direction != cur_direction
+		last_p2 := i+1 == count_p2
+
+		if i != 0 && (chage_direction || last_p2) {
+
+			bound := model.Bound{
+				Direction: cur_direction,
+				Duration:  duration,
+				P1:        p1,
+				P2:        p2,
+			}
+			o.boundPoint = append(o.boundPoint, bound)
+			p1 = p2
+			prev_direction = cur_direction
+			duration = 0
+		} else {
+			p1 = p2
+			prev_direction = cur_direction
+		}
+
+		duration++
 
 	}
 
