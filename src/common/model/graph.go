@@ -4,7 +4,7 @@ package model
 
  */
 type Point struct {
-	X uint
+	X int
 	Y float32
 }
 

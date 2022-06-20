@@ -1,8 +1,6 @@
 package bound
 
 import (
-	"log"
-
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 )
@@ -13,10 +11,9 @@ type Run struct {
 
 func (o *Run) Run() {
 	o.code = doc.GetCodes()
-	for _, v := range o.code[:1] {
+	for _, v := range o.code {
 
-		for _, v2 := range model.PriceTypes_arr[:1] {
-			log.Println(v, v2)
+		for _, v2 := range model.PriceTypes_arr {
 			bline := BoundLine{
 				PriceType: v2,
 				Code:      v.Code,
@@ -24,13 +21,11 @@ func (o *Run) Run() {
 
 			bline.GetStartingPoint()
 			bline.GetAfterStartingPointPipeline()
-			log.Println("bline.StartingPoint", bline.startingPoint)
-			log.Println("bline.AfterStartingPoint len", len(bline.afterStartingPoint))
 			bline.SetBoundPoint()
-			log.Println("bline.SetBoundPoint len", len(bline.boundPoint))
-			log.Println("bline.SetBoundPoint len", bline.boundPoint[:3])
-			//bound point 찾기
-			bline.Insert()
+			if len(bline.boundPoint) > 0 {
+				bline.Insert()
+			}
+
 		}
 	}
 }

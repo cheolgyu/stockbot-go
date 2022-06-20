@@ -80,3 +80,24 @@
         + DB_PUB_COLL_COMPANY
       + DB_DATA
         + DB_DATA_COLL_BOUND_POINT
+
+
+### stockbot/src/task/assemble/line/ymxb 
+   + goal
+     + 직선의 방정식을 이용하여 p1마지막 반등과 p2 현재가격을 직선으로 이어 p3 내일의 다음 가격을 찾기
+   + process
+      ---
+      1. 코드목록조회
+      2. 가격분류별 마지막 반등 POINT인 P1조회
+      3. 가격분류별 마지막 가격 POINT인 P2 조회
+      4. P1과 P2를 이용해 기울기인 M과 B를 구한후 Y값에 해당하는 호가를 호가테이블에서 가져오기
+      5. 저장하기
+      ---      
+   + 테이블
+     + DB_PUB
+        + DB_PUB_COLL_COMPANY
+      + DB_DATA
+        + DB_DATA_COLL_PRICE
+        + DB_DATA_COLL_BOUND_POINT
+        + DB_DATA_COLL_YMXB
+        + DB_DATA_COLL_YMXB_QUOTE_UNIT

@@ -32,10 +32,15 @@ func (o *BoundLine) GetStartingPoint() {
 
 	err := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT).FindOne(ctx, filter, opts).Decode(&o.startingPoint)
 	if err != nil {
-		log.Panicln(err.Error())
+		switch err {
+		case mongo.ErrNoDocuments:
+
+		default:
+			log.Panicln(err.Error())
+		}
+
 	}
 
-	log.Println(o.startingPoint)
 }
 
 func (o *BoundLine) GetAfterStartingPointPipeline() {

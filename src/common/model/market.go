@@ -1,7 +1,47 @@
 package model
 
-var MarketList = []string{"KOSPI", "KOSDAQ", "FUT", "KPI200"}
-var MarketListName = []string{"코스피", "코스닥", "선물", "코스피200"}
+import (
+	"errors"
+	"strings"
+)
+
+type Market int
+
+const (
+
+	//코스피
+	KOSPI Market = iota
+	//코스닥
+	KOSDAQ Market = iota
+	//코넥스
+	KONEX Market = iota
+)
+
+var Market_arr = [...]Market{
+	KOSPI,
+	KOSDAQ,
+	KONEX,
+}
+var Market_String = [...]string{
+	"KOSPI",
+	"KOSDAQ",
+	"KONEX",
+}
+
+func String2Market(str string) (Market, error) {
+	up := strings.ToUpper(str)
+	ii := -10
+	for i, v := range Market_String {
+		if v == up {
+			ii = i
+
+		}
+	}
+	if ii >= 0 {
+		return Market_arr[ii], nil
+	}
+	return Market_arr[0], errors.New("알수없는 마켓문자열입니다. " + str)
+}
 
 /*
 	OP    시가
