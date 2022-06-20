@@ -15,7 +15,7 @@ func (o *Run) Run() {
 	o.code = doc.GetCodes()
 	for _, v := range o.code[:1] {
 
-		for _, v2 := range model.PriceTypes_arr {
+		for _, v2 := range model.PriceTypes_arr[:1] {
 			log.Println(v, v2)
 			bline := BoundLine{
 				PriceType: v2,
@@ -25,12 +25,12 @@ func (o *Run) Run() {
 			bline.GetStartingPoint()
 			bline.GetAfterStartingPointPipeline()
 			log.Println("bline.StartingPoint", bline.startingPoint)
-			log.Println("bline.AfterStartingPoint ", bline.afterStartingPoint[:3])
 			log.Println("bline.AfterStartingPoint len", len(bline.afterStartingPoint))
 			bline.SetBoundPoint()
 			log.Println("bline.SetBoundPoint len", len(bline.boundPoint))
 			log.Println("bline.SetBoundPoint len", bline.boundPoint[:3])
 			//bound point 찾기
+			bline.Insert()
 		}
 	}
 }

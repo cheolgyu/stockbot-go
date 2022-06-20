@@ -1,6 +1,8 @@
 package bound
 
 import (
+	"context"
+	"fmt"
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common"
@@ -24,26 +26,16 @@ func (o *BoundLine) GetStartingPoint() {
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
 
-	projection := bson.M{"p2_x": 1, "p2_y": 1}
-	filter := bson.M{"code": o.Code, "p": o.PriceType}
-	opts := options.Find().SetSort(bson.M{"p2_x": 1}).SetLimit(1).SetProjection(projection)
+	projection := bson.M{"_id": 0, "x": "$p2.x", "y": "$p2.y"}
+	filter := bson.M{"code": o.Code, "price_type": o.PriceType}
+	opts := options.FindOne().SetSort(bson.M{"p2.x": -1}).SetProjection(projection)
 
-	cursor, err := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT).Find(ctx, filter, opts)
+	err := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT).FindOne(ctx, filter, opts).Decode(&o.startingPoint)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 
-	var list []model.Point
-	if err = cursor.All(ctx, &list); err != nil {
-		log.Panicln(err.Error())
-	}
-	defer cursor.Close(ctx)
-
-	if len(list) == 0 {
-		o.startingPoint = model.Point{0, 0}
-	} else {
-		o.startingPoint = list[0]
-	}
+	log.Println(o.startingPoint)
 }
 
 func (o *BoundLine) GetAfterStartingPointPipeline() {
@@ -119,5 +111,31 @@ func (o *BoundLine) SetBoundPoint() {
 		duration++
 
 	}
+
+}
+
+func (o *BoundLine) Insert() {
+	client, ctx := common.Connect()
+	defer client.Disconnect(ctx)
+	collection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
+
+	models := []mongo.WriteModel{}
+
+	for _, v := range o.boundPoint {
+		i := model.BoundPoint{Code: o.Code, PriceType: o.PriceType, Bound: v}
+		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"code": i.Code, "price_type": i.PriceType, "p1.x": i.P1.X}).SetUpsert(true).SetReplacement(i))
+	}
+
+	opts := options.BulkWrite().SetOrdered(false)
+	res, err := collection.BulkWrite(context.TODO(), models, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf(
+		"inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+		res.InsertedCount,
+		res.UpsertedCount,
+		res.ModifiedCount,
+		res.DeletedCount)
 
 }

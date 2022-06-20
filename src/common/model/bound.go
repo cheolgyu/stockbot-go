@@ -1,11 +1,18 @@
 package model
 
+type BoundPoint struct {
+	Code      string
+	PriceType PriceType `bson:"price_type"`
+	Bound     `bson:"inline"`
+}
+
 type Bound struct {
 	Direction
 	Duration uint
 	P1       Point
 	P2       Point
 }
+
 type Direction int
 
 const (
