@@ -21,6 +21,10 @@ import (
 	p1~3는 실제 가격이고 tp1~3은 추상화한 가격,
 	tp의 x는 일자를 1칸으로 추상화하였고,
 	tp의 y는 호가를 1칸으로 추상화하였음.
+
+	+ 현재는 p1은 마지막 바운스고 p2는 마지막점을 type1로 두고
+	+ 나중에 type2는 마지막 저점 바운스 2개고
+	+ type3는 마지막 고점 바운스 2개 로 만들기.
 */
 type ymxb struct {
 	code        string
@@ -49,14 +53,14 @@ func Run() {
 	collection_boud_point := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
 	collection_price := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 	collection_ymxb_quote_unit := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
+	collection_ymxb := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
 
 	company := doc.GetCompany()
+	var list []interface{}
 
 	for _, c := range company {
 		market_code, err := model.String2Market(c.Market)
-		if err != nil {
-			log.Panic(err.Error())
-		}
+		errHandler(err, "model.String2Market(c.Market),c.Market= ", c.Market)
 
 		for _, v := range model.PriceTypes_arr {
 			i := ymxb{
@@ -71,12 +75,30 @@ func Run() {
 			// p1점이 없는 경우
 			if i.p1.X != 0 {
 				i.setM(collection_price, collection_ymxb_quote_unit)
-				panic("저장하기 만들기")
+				list = append(list, model.Ymxb{
+					Code:      i.code,
+					YmxbType:  model.YmxbType1,
+					PriceType: i.price_type,
+					P1:        i.p1,
+					P2:        i.p2,
+					P3:        i.p3,
+					M:         i.m,
+					B:         i.b,
+				})
 			}
-
 		}
-
 	}
+	err := collection_ymxb.Drop(context.TODO())
+	errHandler(err, "collection_ymxb.Drop")
+
+	mod := mongo.IndexModel{
+		Keys:    bson.D{{"code", 1}, {"price_type", 1}, {"ymxb_type", 1}}, // index in ascending order or -1 for descending order
+		Options: options.Index().SetUnique(true),
+	}
+	_, err = collection_ymxb.Indexes().CreateOne(context.TODO(), mod)
+	errHandler(err, "collection_ymxb.Indexes().CreateOne")
+	_, err = collection_ymxb.InsertMany(context.TODO(), list)
+	errHandler(err, "collection_ymxb.InsertMany")
 }
 
 func errHandler(inp error, v ...interface{}) {
@@ -84,13 +106,12 @@ func errHandler(inp error, v ...interface{}) {
 		fmt.Printf("%#v \n", v...)
 		log.Fatalln(inp)
 	}
-
 }
 
 func (o *ymxb) setP1_last_bound(coll *mongo.Collection) {
 
 	projection := bson.M{"_id": 0, "x": "$p2.x", "y": "$p2.y"}
-	filter := bson.M{"code": o.code, "dt": bson.M{"$lt": o.p2.X}, "price_type": o.price_type}
+	filter := bson.M{"code": o.code, "p2.x": bson.M{"$lt": o.p2.X}, "price_type": o.price_type}
 	opts := options.FindOne().SetSort(bson.M{"p2.x": -1}).SetProjection(projection)
 
 	err := coll.FindOne(context.TODO(), filter, opts).Decode(&o.p1)
@@ -131,22 +152,21 @@ func (o *ymxb) setM(coll_price *mongo.Collection, coll_ymxb_quote_unit *mongo.Co
 	err = coll_ymxb_quote_unit.FindOne(context.TODO(), filter2).Decode(&tp2y)
 	errHandler(err, o, "setM", "o.p2.y")
 
-	fmt.Println(o.code, o.price_type)
 	o.tp1x = float64(p1x)
 	o.tp2x = float64(p2x)
 	o.tp1y = float64(tp1y.Tick)
 	o.tp2y = float64(tp2y.Tick)
-	log.Println("tp1=", o.tp1x, o.tp1y, ",tp2=", o.tp2x, o.tp2y)
+	//log.Println("tp1=", o.tp1x, o.tp1y, ",tp2=", o.tp2x, o.tp2y)
 
 	o.m = model.Round2((o.tp2y - o.tp1y) / (o.tp2x - o.tp1x))
 	// y=mx+b
 	// y -mx = b
 	o.b = float64(o.tp1y + o.m*(-1)*o.tp1x)
-	log.Println(" y=  ", o.m, "x +", o.b)
+	//log.Println(" y=  ", o.m, "x +", o.b)
 	o.tp3x = o.tp2x + 1
 	o.tp3y = o.m*o.tp3x + o.b
 
-	filter2 = bson.M{"market": o.market_code, "tick": o.tp3y}
+	filter2 = bson.M{"market": o.market_code, "tick": model.Round0(o.tp3y)}
 	opts := options.FindOne()
 
 	tp3 := model.Unit_quote{}
@@ -154,5 +174,5 @@ func (o *ymxb) setM(coll_price *mongo.Collection, coll_ymxb_quote_unit *mongo.Co
 	errHandler(err, o, "setM", "tp3")
 
 	o.p3.Y = float32(tp3.Price)
-	log.Println("p3.y=", o.p3)
+	//log.Println("p3.y=", o.p3)
 }

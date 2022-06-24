@@ -29,7 +29,7 @@ func initial_db_unit_coll_ymxb_qout() {
 	list := kr_kospi()
 	list = append(list, kr_kosdaq_konex(model.KOSDAQ)...)
 	list = append(list, kr_kosdaq_konex(model.KONEX)...)
-	insert(list)
+	insert_Unit_quote(list)
 }
 
 func kr_kospi() []model.Unit_quote {
@@ -100,7 +100,7 @@ func kr_kosdaq_konex(market model.Market) []model.Unit_quote {
 	}
 	return list
 }
-func insert(list []model.Unit_quote) {
+func insert_Unit_quote(list []model.Unit_quote) {
 	var newValue []interface{}
 
 	for _, v := range list {
