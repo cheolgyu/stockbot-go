@@ -55,7 +55,7 @@
           + DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 가격정보 업데이트 일자
 
 
-### stockbot/src/task/assemble/line/bound 
+### stockbot/src/task/asmb/line/bound 
    + goal
      + 코드의 종시저고가별 누적 몇퍼센트인지 찾기
    + process
@@ -82,13 +82,15 @@
         + DB_DATA_COLL_BOUND_POINT
 
 
-### stockbot/src/task/assemble/line/ymxb 
+### stockbot/src/task/asmb/line/ymxb 
    + goal
-     + 직선의 방정식을 이용하여 p1마지막 반등과 p2 현재가격을 직선으로 이어 p3 내일의 다음 가격을 찾기
+     + 내일 가격 찾기
+   + desc  
+     + 직선의 방정식을 이용하여 p1마지막 반등과 p2 현재가격을 직선으로 이어 p3인 내일 가격 찾기
    + process
       ---
       1. 코드목록조회
-      2. 가격분류별 마지막 반등 POINT인 P1조회
+      2. 가격분류별 마지막 반등 POINT인 P1 조회
       3. 가격분류별 마지막 가격 POINT인 P2 조회
       4. P1과 P2를 이용해 기울기인 M과 B를 구한후 Y값에 해당하는 호가를 호가테이블에서 가져오기
       5. 저장하기
@@ -101,3 +103,38 @@
         + DB_DATA_COLL_BOUND_POINT
         + DB_DATA_COLL_YMXB
         + DB_DATA_COLL_YMXB_QUOTE_UNIT
+   + 기능 추가시
+     + ymxb_type1 은 p1,p2가 마지막 반등, 마지막 가격이라면
+     + ymxb_type2 은 p1,p2가 저가기존 뒤에서2번째 반등, 1번째 반등
+     + ymxb_type3 은 p1,p2가 고가기존 뒤에서2번째 반등, 1번째 반등
+
+### stockbot/src/task/asmb/line/ymxb_hist 
+   + goal
+     + 종목의 기울기와 y절편의 변동내역 확인하기
+   + desc  
+     + 종목의 기울기와 y절편의 변동내역 확인하기
+
+### stockbot/src/task/asmb/agg/vol 
+   + goal
+     + 몰리는 거래량 찾기
+   + desc
+      종목의 연도별 거래량 그래프에서 기간(주,월,분기)별 가장 큰값(주값,월값,분기값)을 찾고   
+      종목의 전체 연도에서 값의 비중이 얼마인지를 백분율로 나타낸다.  
+      기간구분 주, 월, 분기
+   + process
+      ---
+       1. 계산1) 새로운 데이터의 거래량를 새로운 데이터의 일자에 해당하는 누적테이블에 저장한다.
+          1. 새로운데이터목록에서 데이터의 연도를 뽑아내서 다음 계산을 위한 범위를 정한다.
+       2. 계산2) 계산1)에서 구한 연도들을 반복하여 연도별 기간별 최소,최대,평균의 기간별 값을 새로 구한다.
+          1. 2022년도 데이터를 추가하였는데 1999년를 다시 계산할 필요는 없지만 초기실행시 1999~2022 까지 온경우를 대비하여 input을 배열로 처리. 
+          2. 계산 범위는 계산1)에서 정한 범위로 정한다.
+       3. 계산3) 누적테이블에서 전체연도의 최소,최대,평균,백분율을 다시 구한다.
+                  
+        
+      ---      
+   + 테이블
+     + DB_PUB
+        + DB_PUB_COLL_COMPANY
+      + DB_DATA
+        + DB_DATA_COLL_AGG_VOL_SUM
+        + DB_DATA_COLL_AGG_VOL
