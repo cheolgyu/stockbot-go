@@ -3,11 +3,12 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Company struct {
-	Id     primitive.ObjectID `bson:"_id"`
-	Code   Code               `bson:"inline"`
-	Market string             `bson:"market"`
-	Detail CompanyDetail
-	State  CompanyState
+	Id       primitive.ObjectID `bson:"_id"`
+	Code     Code               `bson:"inline"`
+	Market   string             `bson:"market"`
+	Detail   CompanyDetail
+	State    CompanyState
+	AggVolAt int `bson:"agg_vol_at"`
 }
 
 type CompanyDetail struct {
