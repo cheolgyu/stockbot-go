@@ -2,7 +2,6 @@ package price
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,8 +21,9 @@ type naverChart struct {
 	endDate   string
 	model.Code
 
-	url string
-	fnm string
+	url      string
+	fnm      string
+	Openings map[int]int
 }
 
 func (o *naverChart) ready() {
@@ -34,6 +34,7 @@ func (o *naverChart) ready() {
 	// }
 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
 	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.startDate, o.endDate)
+	o.Openings = make(map[int]int)
 
 }
 
@@ -93,6 +94,7 @@ func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 
 				//if dd > ddd {
 				p := stringToPrice(o.Code.Code, re_str)
+				o.Openings[p.Dt] = p.Dt
 				res = append(res, p)
 
 				//}
@@ -140,26 +142,6 @@ func (o *naverChart) Download() error {
 	return err
 }
 
-func convert_g4(num int) (int, error) {
-	var err error
-	res := 0
-	// select   case  when mm < 4 then 1 when mm < 7 then 2  when mm < 10 then 3 else 4 end as q4
-	if num < 4 {
-		res = 1
-	} else if num < 7 {
-		res = 2
-	} else if num < 10 {
-		res = 3
-	} else if num < 13 {
-		res = 4
-	} else {
-
-		err = errors.New(fmt.Sprintf(" 분기 변환 오류: %v", num))
-	}
-
-	return res, err
-}
-
 func parseUint(str string) (int, error) {
 	// 08 일경우 오류 발생.
 	res, err := strconv.Atoi(str)
@@ -175,30 +157,6 @@ func stringToPrice(code string, str string) model.PriceMarket {
 
 	if res, err := parseUint(s0); err == nil {
 		p.Dt = res
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := parseUint(s0[:4]); err == nil {
-		p.Dt_y = res
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := parseUint(s0[4:6]); err == nil {
-		p.Dt_m = res
-	} else if err != nil {
-		log.Println("err:", str)
-		log.Println("err:", str)
-		panic(err)
-	}
-
-	if res, err := parseUint(s0[4:6]); err == nil {
-		if res, err := convert_g4(res); err == nil {
-			p.Dt_q4 = res
-		} else if err != nil {
-			panic(err)
-		}
 	} else if err != nil {
 		panic(err)
 	}

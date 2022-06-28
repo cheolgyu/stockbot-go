@@ -1,15 +1,14 @@
 package price
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Run struct {
@@ -18,6 +17,7 @@ type Run struct {
 	end      string
 	download naverChart
 	_        Insert
+	openings []interface{}
 }
 
 /*
@@ -26,17 +26,20 @@ type Run struct {
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
 func (o *Run) Run() {
+
 	create_index()
+	create_index_opening()
 	o.code = doc.GetCodes()
-	o.code = append(o.code, add_market()...)
+	//o.code = append(o.code, add_market()...)
 	o.start, o.end = startEndDate()
 
 	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
 
-	dataPriceCollection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+	//dataPriceCollection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+	open := make(map[int]int)
+	for _, v := range o.code[:10] {
 
-	for _, v := range o.code {
 		o.download = naverChart{
 			startDate: o.start,
 			endDate:   o.end,
@@ -46,25 +49,50 @@ func (o *Run) Run() {
 		if err != nil {
 			log.Panic(err)
 		}
+		for k, _ := range o.download.Openings {
+			open[k] = k
+		}
+
 		if len(list) > 0 {
-			insert := Insert{
-				coll: dataPriceCollection,
-				code: v,
-				list: list,
-			}
-			insert.Run()
+			// insert := Insert{
+			// 	coll: dataPriceCollection,
+			// 	code: v,
+			// 	list: list,
+			// }
+			//insert.Run()
 
 		} else {
 			log.Println(" price data size 0", v)
 		}
 
 	}
+	log.Println(open)
+	for k, _ := range open {
+		o.openings = append(o.openings, model.NewOpening(model.KR, k))
+	}
+	isnert_opening(o.openings)
 
 	res, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, o.end)
 	if err != nil {
 		panic(err.Error())
 	}
-	log.Println("doc.UpdateNoteOne:", res)
+
+	log.Println("doc.UpdateNoteOne: #v+", res)
+	fmt.Printf("%#v \n", res)
+}
+
+func isnert_opening(list []interface{}) {
+	client, ctx := common.Connect()
+	defer client.Disconnect(ctx)
+
+	coll := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE_OPENING)
+	_, err := coll.InsertMany(context.TODO(), list)
+	if err != nil {
+		if !mongo.IsDuplicateKeyError(err) {
+			panic(err.Error())
+		}
+
+	}
 }
 
 func add_market() []model.Code {
@@ -78,36 +106,4 @@ func add_market() []model.Code {
 		},
 	}
 	return kr_market
-}
-
-//https://christiangiacomi.com/posts/mongodb-index-using-go/
-func create_index() {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
-
-	dataPriceCollection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
-
-	/*
-			// IndexModel represents a new index to be created.
-		type IndexModel struct {
-			// A document describing which keys should be used for the index. It cannot be nil. This must be an order-preserving
-			// type such as bson.D. Map types such as bson.M are not valid. See https://docs.mongodb.com/manual/indexes/#indexes
-			// for examples of valid documents.
-			Keys interface{}
-
-			// The options to use to create the index.
-			Options *options.IndexOptions
-		}
-	*/
-	mod := mongo.IndexModel{
-		Keys:    bson.D{{"code", 1}, {"dt", 1}}, // index in ascending order or -1 for descending order
-		Options: options.Index().SetUnique(true),
-	}
-
-	_, err := dataPriceCollection.Indexes().CreateOne(ctx, mod)
-	if err != nil {
-		// 5. Something went wrong, we log it and return false
-		fmt.Println(err.Error())
-		panic(err.Error())
-	}
 }
