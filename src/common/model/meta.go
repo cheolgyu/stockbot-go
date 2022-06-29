@@ -18,11 +18,3 @@ type DownloadInfo struct {
 	StartDt string
 	EndDt   string
 }
-
-type Opening struct {
-	YY      int
-	MM      int
-	DD      int
-	Week    int
-	Quarter int
-}
