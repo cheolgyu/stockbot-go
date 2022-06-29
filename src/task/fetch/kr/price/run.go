@@ -2,7 +2,6 @@ package price
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common"
@@ -30,6 +29,7 @@ func (o *Run) Run() {
 	create_index()
 	create_index_opening()
 	o.code = doc.GetCodes()
+	// 마켓 데이터필요
 	//o.code = append(o.code, add_market()...)
 	o.start, o.end = startEndDate()
 
@@ -66,19 +66,17 @@ func (o *Run) Run() {
 		}
 
 	}
-	log.Println(open)
+
 	for k, _ := range open {
 		o.openings = append(o.openings, model.NewOpening(model.KR, k))
 	}
 	isnert_opening(o.openings)
 
-	res, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, o.end)
+	_, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, o.end)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	log.Println("doc.UpdateNoteOne: #v+", res)
-	fmt.Printf("%#v \n", res)
 }
 
 func isnert_opening(list []interface{}) {

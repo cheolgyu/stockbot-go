@@ -105,9 +105,6 @@ func NewOpening(c Country, dt int) Opening {
 		panic(err)
 	}
 
-	//해당날짜가 몇주쨰인지 구한다.
-	time.Date(o.Y, time.Month(o.M), o.D, 0, 0, 0, 0, Loc).ISOWeek()
-
 	if res, err := parseUint(sdt[4:6]); err == nil {
 		o.M = res
 		if res2, err := convert_g4(o.M); err == nil {
@@ -123,6 +120,12 @@ func NewOpening(c Country, dt int) Opening {
 	} else if err != nil {
 		panic(err)
 	}
+
+	//해당날짜가 몇주쨰인지 구한다.
+	t := time.Date(o.Y, time.Month(o.M), o.D, 12, 12, 12, 12, Loc)
+	_, w := t.ISOWeek()
+	o.Week = w
+
 	return o
 
 }
