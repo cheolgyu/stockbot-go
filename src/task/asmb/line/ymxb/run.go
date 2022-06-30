@@ -13,6 +13,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var client *mongo.Client
+var ctx context.Context
+
+func init() {
+	client, ctx = common.Connect()
+}
+
 /*
 	y=mx+b,
 	p1은 저고종시가의 마지막 바운스점,
@@ -28,7 +35,7 @@ import (
 */
 type ymxb struct {
 	code        string
-	market_code model.Market
+	market_code model.MarketType
 	price_type  model.PriceType
 
 	p1 model.Point
@@ -48,14 +55,13 @@ type ymxb struct {
 }
 
 func Run() {
-	client, ctx := common.Connect()
 	defer client.Disconnect(ctx)
 	collection_boud_point := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
 	collection_price := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 	collection_ymxb_quote_unit := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
 	collection_ymxb := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
 
-	company := doc.GetCompany()
+	company := doc.GetCompany(client)
 	var list []interface{}
 
 	for _, c := range company {

@@ -1,0 +1,37 @@
+
+
+###kind
+
+### 전종목 기본정보 코드요청 
+## http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020103 
+## http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020103
+POST http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+
+mktId=ALL&share=1&csvxls_isNo=false&name=fileDown&url=dbms/MDC/STAT/standard/MDCSTAT01901
+
+
+### 전종목 기본정보 파일요청
+
+POST http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd HTTP/1.1
+Accept-Encoding: gzip, deflate
+content-type: application/x-www-form-urlencoded
+
+code=b8yERETqFgeBbrinqpWkPScz2IeU6GiWvTbWiwfoWEYRtSksuLS7Bnxpl86F7dAOvXfGx9S2U5wgvoxsacATRRtmGtORI4WrGDmruVe6oXtCqUypoW0Lp6SAPP0PhVkgThCTcjIZNPI5lCTubZnhjio6AHXdxc45YVEhz4JdugHPMxvIwHadpQpCGE1HxZAXvTCprTIXuXT9XxFb88awpQ==
+
+### 전종목 지정내역 코드요청 
+## http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020103
+POST http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd HTTP/1.1
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+
+mktId=ALL&share=1&csvxls_isNo=false&name=fileDown&url=dbms/MDC/STAT/standard/MDCSTAT02001
+
+
+### 전종목 지정내역 파일요청
+
+POST http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd HTTP/1.1
+Accept-Encoding: gzip, deflate
+content-type: application/x-www-form-urlencoded
+
+code=MzsoLyrm9m4iibyhBLIs7zmzvLFHNw0WMB4TV4pABvYRtSksuLS7Bnxpl86F7dAOvXfGx9S2U5wgvoxsacATRRtmGtORI4WrGDmruVe6oXtCqUypoW0Lp6SAPP0PhVkgThCTcjIZNPI5lCTubZnhjio6AHXdxc45YVEhz4JdugHPMxvIwHadpQpCGE1HxZAXvTCprTIXuXT9XxFb88awpQ==
+

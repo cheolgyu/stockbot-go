@@ -1,43 +1,57 @@
 package doc
 
 import (
+	"context"
 	"log"
 
-	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetCompany() []model.Company {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
+func GetCompany(client *mongo.Client) []model.Company {
 
-	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(ctx, bson.M{})
+	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(context.TODO(), bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	var list []model.Company
 
-	defer cursor.Close(ctx)
-	cursor.All(ctx, &list)
+	defer cursor.Close(context.TODO())
+	cursor.All(context.TODO(), &list)
 
 	return list
 }
 
-func GetCodes() []model.Code {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
+func GetCodes(client *mongo.Client, country model.Country) []model.Code {
 	opts := options.Find().SetProjection(bson.M{"code": 1, "name": 1})
-
-	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(ctx, bson.M{}, opts)
+	// filter := bson.M{"country": country}
+	filter := bson.M{}
+	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(context.TODO(), filter, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var list []model.Code
 
-	defer cursor.Close(ctx)
-	cursor.All(ctx, &list)
+	defer cursor.Close(context.TODO())
+	cursor.All(context.TODO(), &list)
+
+	return list
+}
+
+func GetCodesMarket(client *mongo.Client, country model.Country) []model.Code {
+	opts := options.Find().SetProjection(bson.M{"code": 1, "name": 1})
+	filter := bson.M{"country": country}
+
+	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_MARKET).Find(context.TODO(), filter, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var list []model.Code
+
+	defer cursor.Close(context.TODO())
+	cursor.All(context.TODO(), &list)
 
 	return list
 }

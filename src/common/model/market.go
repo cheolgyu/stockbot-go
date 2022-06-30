@@ -8,7 +8,12 @@ import (
 	"time"
 )
 
-type Market int
+type Market struct {
+	Code Code `bson:"inline"`
+	Country
+	UpdatedMarketAt int `bson:"updated_market_at"`
+}
+type MarketType int
 
 var Loc *time.Location
 
@@ -23,37 +28,53 @@ func init() {
 const (
 
 	//코스피
-	KOSPI Market = iota
+	KOSPI MarketType = iota
 	//코스닥
-	KOSDAQ Market = iota
+	KOSDAQ MarketType = iota
 	//코넥스
-	KONEX Market = iota
+	KONEX MarketType = iota
 )
 
-var Market_arr = [...]Market{
+// key:MarketType, value:Code
+var MarketType_map = map[MarketType]Code{
+	KOSPI:  Code{"KOSPI", "코스피"},
+	KOSDAQ: Code{"KOSDAQ", "코스닥"},
+	KONEX:  Code{"KONEX", "코넥스"},
+}
+
+func init() {
+
+}
+
+var MarketType_arr = [...]MarketType{
 	KOSPI,
 	KOSDAQ,
 	KONEX,
 }
-var Market_String = [...]string{
+var MarketType_code_String = [...]string{
 	"KOSPI",
 	"KOSDAQ",
 	"KONEX",
 }
+var MarketType_name_String = [...]string{
+	"코스피",
+	"코스닥",
+	"코넥스",
+}
 
-func String2Market(str string) (Market, error) {
+func String2Market(str string) (MarketType, error) {
 	up := strings.ToUpper(str)
 	ii := -10
-	for i, v := range Market_String {
+	for i, v := range MarketType_code_String {
 		if v == up {
 			ii = i
 
 		}
 	}
 	if ii >= 0 {
-		return Market_arr[ii], nil
+		return MarketType_arr[ii], nil
 	}
-	return Market_arr[0], errors.New("알수없는 마켓문자열입니다. " + str)
+	return MarketType_arr[0], errors.New("알수없는 마켓문자열입니다. " + str)
 }
 
 /*

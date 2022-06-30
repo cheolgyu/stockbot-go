@@ -33,6 +33,11 @@ func (o *naverChart) ready() {
 	// 	o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
 	// }
 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+
+	if o.startDate == "" {
+		o.startDate = config.PRICE_DEFAULT_START_DATE
+	}
+
 	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.startDate, o.endDate)
 	o.Openings = make(map[int]int)
 

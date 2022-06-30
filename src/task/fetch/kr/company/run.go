@@ -34,7 +34,7 @@ func (o *Run) Run() {
 		list = append(list, o.old_list[v.Code.Code])
 	}
 
-	log.Println("len(old_companys)=", len(o.old_list))
+	log.Println("len(merge_companys)=", len(o.old_list))
 	o.insert.Company = list
 	o.insert.Run()
 }

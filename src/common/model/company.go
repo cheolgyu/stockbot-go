@@ -1,14 +1,14 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
-
 type Company struct {
-	Id       primitive.ObjectID `bson:"_id"`
-	Code     Code               `bson:"inline"`
-	Market   string             `bson:"market"`
-	Detail   CompanyDetail
-	State    CompanyState
-	AggVolAt int `bson:"agg_vol_at"`
+	Code Code `bson:"inline"`
+	Country
+	Market           string `bson:"market"`
+	Detail           CompanyDetail
+	State            CompanyState
+	AggVolAt         int `bson:"agg_vol_at"`
+	UpdatedPriceAt   int `bson:"updated_price_at"`
+	UpdatedCompanyAt int `bson:"updated_company_at"`
 }
 
 type CompanyDetail struct {

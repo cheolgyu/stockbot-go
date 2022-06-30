@@ -1,9 +1,9 @@
 package price
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,10 +11,7 @@ import (
 )
 
 //https://christiangiacomi.com/posts/mongodb-index-using-go/
-func create_index() {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
-
+func create_index(client *mongo.Client) {
 	dataPriceCollection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 
 	/*
@@ -34,7 +31,7 @@ func create_index() {
 		Options: options.Index().SetUnique(true),
 	}
 
-	_, err := dataPriceCollection.Indexes().CreateOne(ctx, mod)
+	_, err := dataPriceCollection.Indexes().CreateOne(context.TODO(), mod)
 	if err != nil {
 		// 5. Something went wrong, we log it and return false
 		fmt.Println(err.Error())
@@ -42,9 +39,7 @@ func create_index() {
 	}
 }
 
-func create_index_opening() {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
+func create_index_opening(client *mongo.Client) {
 
 	coll := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE_OPENING)
 
@@ -53,7 +48,7 @@ func create_index_opening() {
 		Options: options.Index().SetUnique(true),
 	}
 
-	_, err := coll.Indexes().CreateOne(ctx, mod)
+	_, err := coll.Indexes().CreateOne(context.TODO(), mod)
 	if err != nil {
 		// 5. Something went wrong, we log it and return false
 		fmt.Println(err.Error())

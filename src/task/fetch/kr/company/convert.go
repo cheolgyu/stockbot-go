@@ -8,7 +8,6 @@ import (
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"github.com/tealeg/xlsx"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Convert struct {
@@ -20,20 +19,20 @@ func (o *Convert) Run() {
 	o.run_state()
 }
 
-func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
+func (o *Convert) update(upsert_cmp model.Company, converting_detail bool) {
 	om, exist := o.Old[upsert_cmp.Code.Code]
 
 	if exist {
-		if is_detail {
+		if converting_detail {
 			om.Detail = upsert_cmp.Detail
 		} else {
 			om.State = upsert_cmp.State
 		}
 	} else {
 		//new code
-		if is_detail {
+		if converting_detail {
+			om.Country = model.KR
 			om = upsert_cmp
-			om.Id = primitive.NewObjectID()
 		} else {
 			//detail 파일에는 있고 state 파일에만 있는 코드 등장
 			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")
@@ -41,7 +40,7 @@ func (o *Convert) update(upsert_cmp model.Company, is_detail bool) {
 
 	}
 
-	if is_detail {
+	if converting_detail {
 		om.Detail = upsert_cmp.Detail
 	} else {
 		om.State = upsert_cmp.State

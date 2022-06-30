@@ -39,11 +39,11 @@ func (o *Req_krx) Run() {
 	if config.DownloadCompany {
 		detail := Req_krx{Object: config.COMPANY_DETAIL}
 		detail.init()
-		detail.down_code()
+		detail.code = detail.down_code()
 		detail.down_file()
 		state := Req_krx{Object: config.COMPANY_STATE}
 		state.init()
-		state.down_code()
+		state.code = state.down_code()
 		state.down_file()
 	}
 }
