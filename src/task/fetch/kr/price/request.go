@@ -101,7 +101,7 @@ func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 
 				//if dd > ddd {
 				p := stringToPrice(o.Code.Code, re_str)
-				o.Openings[p.Dt] = p.Dt
+				o.Openings[p.DateInfo.Dt] = p.DateInfo.Dt
 				res = append(res, p)
 
 				//}
@@ -169,7 +169,7 @@ func stringToPrice(code string, str string) model.PriceMarket {
 	var s0 = arr[0]
 
 	if res, err := parseUint(s0); err == nil {
-		p.Dt = res
+		p.DateInfo = model.NewDateInfo(res)
 	} else if err != nil {
 		panic(err)
 	}

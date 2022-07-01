@@ -25,40 +25,41 @@ func Run() {
 	collection_agg_vol = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_AGG_VOL)
 	collection_agg_vol_sum = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_AGG_VOL_SUM)
 
-	companys := doc.GetCompany()
-	for _, v := range companys[:1] {
-		prices := select_new_price_data(v.Code.Code, v.AggVolAt)
+	// companys := doc.GetCompany()
+	// for _, v := range companys[:1] {
+	// 	prices := select_new_price_data(v.Code.Code, v.AggVolAt)
 
-		years := make(map[int]bool)
-		for _, v := range prices {
-			years[v.Dt_y] = true
-			
-		}
-		insert_new_price_data(prices)
-	}
+	// 	years := make(map[int]bool)
+	// 	for _, v := range prices {
+	// 		years[v.DateInfo.Dt_y] = true
+
+	// 	}
+	// 	insert_new_price_data(prices)
+	// }
 }
 
 func insert_new_price_data(price []model.PriceMarket) {
 
-	models := []mongo.WriteModel{}
+	//models := []mongo.WriteModel{}
 
-	for _, v := range price {
-		i := model.AggVolSum{Code: v.Code,Year: v.Dt_y,PeriodType: ,VOL}
-		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"code": i.Code, "price_type": i.PriceType, "p1.x": i.P1.X}).SetUpsert(true).SetReplacement(i))
-	}
+	// for _, v := range price {
+	// 	i := model.AggVolSum{Code: v.Code,Year: v.Dt_y,PeriodType: ,VOL}
+	// 	filter := bson.M{"code": i.Code, "price_type": i.PriceType, "p1.x": i.P1.X}
+	// 	models = append(models, mongo.NewReplaceOneModel().SetFilter(filter).SetUpsert(true).SetReplacement(i))
+	// }
 
-	opts := options.BulkWrite().SetOrdered(false)
-	res, err := collection_agg_vol_sum.BulkWrite(context.TODO(), models, opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf(
-		"inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
-		res.InsertedCount,
-		res.UpsertedCount,
-		res.ModifiedCount,
-		res.DeletedCount)
-	
+	// opts := options.BulkWrite().SetOrdered(false)
+	// res, err := collection_agg_vol_sum.BulkWrite(context.TODO(), models, opts)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Printf(
+	// 	"inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+	// 	res.InsertedCount,
+	// 	res.UpsertedCount,
+	// 	res.ModifiedCount,
+	// 	res.DeletedCount)
+
 }
 
 func select_new_price_data(code string, last int) []model.PriceMarket {

@@ -42,10 +42,6 @@ var MarketType_map = map[MarketType]Code{
 	KONEX:  Code{"KONEX", "코넥스"},
 }
 
-func init() {
-
-}
-
 var MarketType_arr = [...]MarketType{
 	KOSPI,
 	KOSDAQ,
@@ -85,13 +81,13 @@ func String2Market(str string) (MarketType, error) {
 	Vol   거래량
 */
 type PriceMarket struct {
-	Code string
-	Dt   int
-	OP   float32
-	CP   float32
-	LP   float32
-	HP   float32
-	Vol  int
+	Code     string
+	DateInfo `bson:"inline"`
+	OP       float32
+	CP       float32
+	LP       float32
+	HP       float32
+	Vol      int
 	//ForeignerBurnoutRate
 	FBR string
 }
@@ -105,8 +101,7 @@ const (
 	US Country = "us"
 )
 
-type Opening struct {
-	Country
+type DateInfo struct {
 	Dt      int
 	Y       int
 	M       int
@@ -115,9 +110,8 @@ type Opening struct {
 	Quarter int
 }
 
-func NewOpening(c Country, dt int) Opening {
-	o := Opening{}
-	o.Country = c
+func NewDateInfo(dt int) DateInfo {
+	o := DateInfo{}
 	o.Dt = dt
 	sdt := strconv.Itoa(dt)
 	if res, err := parseUint(sdt[:4]); err == nil {
@@ -146,6 +140,20 @@ func NewOpening(c Country, dt int) Opening {
 	t := time.Date(o.Y, time.Month(o.M), o.D, 12, 12, 12, 12, Loc)
 	_, w := t.ISOWeek()
 	o.Week = w
+
+	return o
+
+}
+
+type Opening struct {
+	Country
+	DateInfo `bson:"inline"`
+}
+
+func NewOpening(c Country, dt int) Opening {
+	o := Opening{}
+	o.Country = c
+	o.DateInfo = NewDateInfo(dt)
 
 	return o
 
