@@ -15,6 +15,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var client *mongo.Client
+var ctx context.Context
+var collectionPrice *mongo.Collection
+
+func init() {
+	client, ctx = common.Connect()
+	create_index_price(client)
+	create_index_opening(client)
+	collectionPrice = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+}
+
 type Run struct {
 	code     []model.Code
 	_        Insert
@@ -26,8 +37,6 @@ type Run struct {
 
 type RunCode struct {
 	code     model.Code
-	start    string
-	end      string
 	download naverChart
 	openings []interface{}
 }
@@ -67,17 +76,6 @@ func (o *Run) setDate_StartEnd() {
 	o.endDate = time.Now().Format(config.PRICE_DATE_FORMAT)
 }
 
-var client *mongo.Client
-var ctx context.Context
-var collectionPrice *mongo.Collection
-
-func init() {
-	client, ctx = common.Connect()
-	create_index(client)
-	create_index_opening(client)
-	collectionPrice = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
-}
-
 /*
 1. 종목코드 조회
 2. 종목코드로 가격데이터 다운로드
@@ -89,7 +87,7 @@ func (o *Run) Run() {
 
 	o.setDate_StartEnd()
 	o.code = doc.GetCodes(client, model.KR)
-	o.code = append(o.code[:10], doc.GetCodesMarket(client, model.KR)...)
+	o.code = append(o.code, doc.GetCodesMarket(client, model.KR)...)
 
 	open := make(map[int]int)
 	for _, v := range o.code {

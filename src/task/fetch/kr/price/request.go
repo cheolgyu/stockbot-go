@@ -49,7 +49,10 @@ func (o *naverChart) Run() ([]model.PriceMarket, error) {
 	o.ready()
 	if config.DownloadPrice {
 		err_down := o.Download()
-		return nil, err_down
+		if err_down != nil {
+			log.Fatalln(err_down)
+			return nil, err_down
+		}
 	}
 	res, err := o.Parse()
 
@@ -65,7 +68,6 @@ func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 		log.Fatal(err)
 		panic(err)
 	}
-	defer file.Close()
 
 	reader := bufio.NewReader(file)
 	idx := 0
@@ -108,6 +110,9 @@ func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 		}
 
 	}
+
+	file.Close()
+
 	return res, err
 
 }
@@ -130,20 +135,23 @@ func (o *naverChart) Download() error {
 		return err
 	}
 
-	defer resp.Body.Close()
 	out, err := os.Create(o.fnm)
 	if err != nil {
 		log.Println("Download os.Create 에러")
 		log.Fatal(err)
 		return err
 	}
-	defer out.Close()
+
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
 		log.Println("Download io.Copy 에러")
 		log.Fatal(err)
 		return err
 	}
+
+	out.Close()
+	resp.Body.Close()
+
 	return err
 }
 
