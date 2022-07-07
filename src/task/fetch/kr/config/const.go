@@ -46,7 +46,7 @@ var DB_MAX_CONN = 30
 var Config map[string]int
 
 func init() {
-	DownloadCompany = true
-	DownloadPrice = true
+	DownloadCompany = false
+	DownloadPrice = false
 
 }

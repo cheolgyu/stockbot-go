@@ -14,7 +14,7 @@ const (
 type AggVolSum struct {
 	Code       string
 	Year       int
-	SumWeeks   int
-	SumMonth   int
-	SumQuarter int
+	SumWeeks   []int
+	SumMonth   []int
+	SumQuarter []int
 }
