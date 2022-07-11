@@ -3,10 +3,12 @@ package vol
 import (
 	"context"
 	"math"
+	"time"
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/schollz/progressbar/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,8 +22,10 @@ var collection_agg_vol_sum *mongo.Collection
 /*
 절차
 	agg_vol_sum 계산범위:  코드별 마지막 가격데이터의 년도
-	1. 코드별 마지막가격 데이터의 년도에 해당하는 가격데이터의 조회한다.
-	11. sum 테이블의 코드별 마지막 년도를 구하여 그연도 이후 가격테이터를 조회한다.
+	1. agg_vol_sum에서 테이블의 코드별 마지막 년도를 구한다 없으면0을 반환한다.
+		1.1 agg_vol_sum에서 테이블의 코드별 마지막 년도를 구한다 없으면0을 반환한다.
+		1.2 agg_vol_sum의 year가 0이면 code의 price 데이터중 가장 작은 year은 구한다.
+		1.3 특정연도의 가격테이터를 조회한다.
 	2. 코드별 연도별 가격데이터에서 주별 거래량의합, 월별 거래량의 합, 분기별 거래량의합을 구한다.
 	3. 코드별 연도별 가격데이터에서 연도의 최소거래량인 주,월,분기 최대거래량인 주,월,분기, 평균, 평균이하이상을 구한다.
 	4. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
@@ -39,20 +43,43 @@ func Run() {
 	collection_agg_vol = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_AGG_VOL)
 	collection_agg_vol_sum = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_AGG_VOL_SUM)
 
+	t := time.Now()
+	cur_year := t.Year()
 	companys := doc.GetCompany(client)
-	panic("11. sum 테이블의 코드별 마지막 년도를 구하여 그연도 이후 가격테이터를 조회한다.")
+
+	bar := progressbar.Default(int64(len(companys)))
+
 	for _, v := range companys {
-		prices := select_price_list(v.Code.Code)
-		agg_vol_sum := sum(prices)
-		agg_vol_sum.Calculate()
-		upsert_sum(agg_vol_sum)
+		bar.Add(1)
+		year_start := 0
+		for year_item := 0; year_item <= cur_year; year_item++ {
+
+			if year_item == 0 {
+				year_start = chk_year_agg_vol_sum(v.Code.Code)
+				if year_start == 0 {
+					year_item = chk_year_price(v.Code.Code)
+				} else {
+					year_item = year_start
+				}
+			}
+
+			prices := select_price_eq_year(v.Code.Code, year_item)
+			agg_vol_sum := sum(prices)
+			agg_vol_sum.Calculate()
+			upsert_sum(agg_vol_sum)
+
+		}
+
 		total_sum := select_total_agg_vol_sum(v.Code.Code)
 		aggVol := get_percent(total_sum)
 		upsert_agg_vol(aggVol)
 	}
 }
 
-func select_price_list11(code string) []model.PriceMarket {
+// 1.1 agg_vol_sum에서 테이블의 코드별 마지막 년도를 구한다 없으면0을 반환한다.
+func chk_year_agg_vol_sum(code string) (year int) {
+	year = -1
+	noDocument := false
 
 	matchStage := bson.D{{"$match", bson.D{{"code", code}}}}
 	groupStage := bson.D{
@@ -63,112 +90,71 @@ func select_price_list11(code string) []model.PriceMarket {
 			},
 		},
 	}
-	lookupStage := bson.D{
-		{"$lookup",
-			bson.D{
-				{"from", "agg_vol_sum"},
-				{"localField", "year"},
-				{"foreignField", "y"},
-				{"pipeline",
-					bson.A{
-						bson.D{{"$match", bson.D{{"code", code}}}},
-						bson.D{
-							{"$group",
-								bson.D{
-									{"_id", ""},
-									{"year", bson.D{{"$max", "$year"}}},
-								},
-							},
-						},
-						bson.D{
-							{"$project",
-								bson.D{
-									{"_id", 0},
-									{"year", 1},
-								},
-							},
-						},
-					},
-				},
-				{"as", "list"},
-			},
-		},
-	}
 
-	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$list"}}}}
-	replaceRootStage := bson.D{{"$replaceRoot", bson.D{{"newRoot", "$list"}}}}
+	pipeline := mongo.Pipeline{matchStage, groupStage}
 
-	pipeline := mongo.Pipeline{matchStage, groupStage, lookupStage, unwindStage, replaceRootStage}
-
-	var results []model.PriceMarket
 	cursor, err := collection_price.Aggregate(context.TODO(), pipeline)
 	if err != nil {
-		panic(err)
+		if err == mongo.ErrNoDocuments {
+			year = 0
+			noDocument = true
+		} else {
+			panic(err)
+		}
 	}
 
-	if err = cursor.All(context.TODO(), &results); err != nil {
-		panic(err)
+	if !noDocument {
+		var results []model.AggVolSum
+		if err = cursor.All(context.TODO(), &results); err != nil {
+			panic(err)
+		}
+		year = results[0].Year
 	}
-	return results
+
+	return year
+
 }
 
-// 1. 코드별 마지막가격 데이터의 년도에 해당하는 가격데이터의 조회한다.
-func select_price_list(code string) []model.PriceMarket {
+//1-2 code의 price 데이터중 가장 작은 year은 구한다.
+func chk_year_price(code string) (year int) {
 
-	matchStage := bson.D{{"$match", bson.D{{"code", code}}}}
-	groupStage := bson.D{
-		{"$group",
+	filter := bson.M{"code": code}
+	sort := bson.M{"dt": 1}
+
+	opts := options.FindOne()
+	opts.SetSort(sort)
+
+	res := model.PriceMarket{}
+	collection_price.FindOne(context.TODO(), filter, opts).Decode(&res)
+
+	year = res.Y
+
+	return year
+}
+
+//1.3 특정연도의 가격테이터를 조회한다.
+func select_price_eq_year(code string, year int) (prices []model.PriceMarket) {
+	matchStage := bson.D{{"$match", bson.D{{"code", code}, {"y", year}}}}
+	sortStage := bson.D{
+		{"$sort",
 			bson.D{
-				{"_id", ""},
-				{"max_y", bson.D{{"$max", "$y"}}},
-			},
-		},
-	}
-	lookupStage := bson.D{
-		{"$lookup",
-			bson.D{
-				{"from", "price"},
-				{"localField", "max_y"},
-				{"foreignField", "y"},
-				{"pipeline",
-					bson.A{
-						bson.D{{"$match", bson.D{{"code", code}}}},
-						bson.D{
-							{"$project",
-								bson.D{
-									{"_id", 0},
-									{"cp", 0},
-									{"op", 0},
-									{"lp", 0},
-									{"hp", 0},
-									{"fbr", 0},
-								},
-							},
-						},
-						bson.D{{"$sort", bson.D{{"dt", -1}}}},
-					},
-				},
-				{"as", "list"},
+				{"dt", 1},
 			},
 		},
 	}
 
-	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$list"}}}}
-	replaceRootStage := bson.D{{"$replaceRoot", bson.D{{"newRoot", "$list"}}}}
+	pipeline := mongo.Pipeline{matchStage, sortStage}
 
-	pipeline := mongo.Pipeline{matchStage, groupStage, lookupStage, unwindStage, replaceRootStage}
-
-	var results []model.PriceMarket
 	cursor, err := collection_price.Aggregate(context.TODO(), pipeline)
 	if err != nil {
 		panic(err)
 	}
 
-	if err = cursor.All(context.TODO(), &results); err != nil {
+	if err = cursor.All(context.TODO(), &prices); err != nil {
 		panic(err)
 	}
-	return results
 
+	return prices
 }
 
 //2. 코드별 가격데이터에서 주별 거래량의합, 월별 거래량의 합, 분기별 거래량의합을 구한다.
