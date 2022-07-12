@@ -31,6 +31,7 @@ var collection_agg_vol_sum *mongo.Collection
 	4. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
 	5. 코드별 전체연도의 agg_vol_sum을 조회한다.
 	6. 코드별 코드의 전체연도의 agg_vol_sum데이터로 기간별 표준편차를 구한다.
+		6.1 빈도를 분석한다.
 	7. 코드별 코드의 전체연도의 기간별 표준편차를 저장한다.
 
 */
@@ -215,7 +216,7 @@ func select_total_agg_vol_sum(code string) []model.AggVolSum {
 //(방법: https://namu.wiki/w/표준편차 )
 func get_percent(list []model.AggVolSum) model.AggVol {
 	var res model.AggVol
-	res.Result = make(map[string]model.AggVolStatisticBasic)
+	res.Result = make(map[string]model.Statistic)
 	res.Code = list[0].Code
 
 	for _, ov := range model.ObservationValueTypeArr {
@@ -223,16 +224,42 @@ func get_percent(list []model.AggVolSum) model.AggVol {
 		deviation_list := get_deviation(ov, avgObsrvValue, list)
 		std_dvtn, square_avg := get_standard_deviation(deviation_list)
 
-		avs := model.AggVolStatisticBasic{}
-		avs.DataCnt = len(deviation_list)
-		avs.Data = data
-		avs.Average = avgObsrvValue
-		avs.Variance = square_avg
-		avs.StandardDeviation = std_dvtn
+		avs := model.Statistic{}
+		avs.BaseAnalysis.DataCnt = len(deviation_list)
+		avs.BaseAnalysis.Data = data
+		avs.BaseAnalysis.Average = avgObsrvValue
+		avs.BaseAnalysis.Variance = square_avg
+		avs.BaseAnalysis.StandardDeviation = std_dvtn
+
+		fa := model.FrequencyAnalysis{}
+		fa.Table = getFrequencyAnalysis(ov, data)
+		avs.FrequencyAnalysis = fa
+
 		res.Result[ov.ToField()] = avs
 	}
 
 	return res
+}
+
+func getFrequencyAnalysis(ov model.ObservationValueType, data map[int]int) map[int]model.FrequencyTableRow {
+	item := make(map[int]model.FrequencyTableRow)
+
+	all_frequency := 0
+	for _, v := range data {
+		row := item[v]
+		row.Value = v
+		row.Frequency++
+		item[v] = row
+		all_frequency++
+	}
+
+	for k, _ := range item {
+		row := item[k]
+		row.Percentage = model.Round2((float64(row.Frequency) / float64(all_frequency)) * 100)
+		item[k] = row
+	}
+
+	return item
 }
 
 // 6-1 관찰값들의 평균을 구한다. (편차값을 구하기 위해서)

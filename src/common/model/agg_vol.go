@@ -119,11 +119,19 @@ func calculateByPeriodType(items map[int]int) (res AggVolSumResult) {
 
 type AggVol struct {
 	Code   string
-	Result map[string]AggVolStatisticBasic
+	Result map[string]Statistic
 }
 
-type AggVolStatisticBasic struct {
+//표준편차용
+type Statistic struct {
+	// 표준편차용
+	BaseAnalysis
+	//빈도분석
+	FrequencyAnalysis
+}
 
+//표준편차용
+type BaseAnalysis struct {
 	// 데이터수
 	DataCnt int
 	// 데이터 key:년도 value:관측값
@@ -134,6 +142,22 @@ type AggVolStatisticBasic struct {
 	Variance float64
 	// 표준편차
 	StandardDeviation float64
+}
+
+//빈도분석용
+type FrequencyAnalysis struct {
+	// 데이터 key:항목(1월~12월)
+	Table map[int]FrequencyTableRow
+}
+
+//빈도분석용 테이블 행
+type FrequencyTableRow struct {
+	// 유효항목값(1월~12월)
+	Value int
+	// 빈도값
+	Frequency int
+	// 백분율
+	Percentage float64
 }
 
 // 관찰값종류
