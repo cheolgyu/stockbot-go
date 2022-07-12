@@ -24,7 +24,7 @@ func (o *Insert) Run() {
 	models := []mongo.WriteModel{}
 
 	for _, v := range o.Company {
-		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"code": v.Code}).SetUpsert(true).SetReplacement(v))
+		models = append(models, mongo.NewReplaceOneModel().SetFilter(bson.M{"code": v.Code.Code}).SetUpsert(true).SetReplacement(v))
 	}
 
 	opts := options.BulkWrite().SetOrdered(false)

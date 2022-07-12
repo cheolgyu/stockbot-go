@@ -31,8 +31,8 @@ func (o *Convert) update(upsert_cmp model.Company, converting_detail bool) {
 	} else {
 		//new code
 		if converting_detail {
-			om.Country = model.KR
 			om = upsert_cmp
+			om.Country = model.KR
 		} else {
 			//detail 파일에는 있고 state 파일에만 있는 코드 등장
 			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")
