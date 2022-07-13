@@ -27,12 +27,15 @@ var collection_agg_vol_sum *mongo.Collection
 		1.2 agg_vol_sum의 year가 0이면 code의 price 데이터중 가장 작은 year은 구한다.
 		1.3 특정연도의 가격테이터를 조회한다.
 	2. 코드별 연도별 가격데이터에서 주별 거래량의합, 월별 거래량의 합, 분기별 거래량의합을 구한다.
-	3. 코드별 연도별 가격데이터에서 연도의 최소거래량인 주,월,분기 최대거래량인 주,월,분기, 평균, 평균이하이상을 구한다.
-	4. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
-	5. 코드별 전체연도의 agg_vol_sum을 조회한다.
-	6. 코드별 코드의 전체연도의 agg_vol_sum데이터로 기간별 표준편차를 구한다.
-		6.1 빈도를 분석한다.
-	7. 코드별 코드의 전체연도의 기간별 표준편차를 저장한다.
+	3. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
+	4. 코드별 전체연도의 agg_vol_sum을 조회한다.
+	5. 코드별 코드의 전체연도의 agg_vol_sum데이터로 기간별 표준편차를 구한다.
+		5.1 표준편차를 구한다.
+			5.1.1 관찰값들의 평균을 구한다. (편차값을 구하기 위해서)
+			5.1.2 편차를 구한다. (편차: 관측값에서 평균을 뺀것)
+			5.1.3 표준편차를 구한다.
+		5.2 빈도를 분석한다.
+	6. 코드별 코드의 전체연도의 기간별 표준편차를 저장한다.
 
 */
 func Run() {
@@ -116,7 +119,7 @@ func chk_year_agg_vol_sum(code string) (year int) {
 
 }
 
-//1-2 code의 price 데이터중 가장 작은 year은 구한다.
+//1-2 agg_vol_sum의 year가 0이면 code의 price 데이터중 가장 작은 year은 구한다.
 func chk_year_price(code string) (year int) {
 
 	filter := bson.M{"code": code}
@@ -179,7 +182,7 @@ func sum(list []model.PriceMarket) model.AggVolSum {
 	return item
 }
 
-// 4. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
+// 3. 코드별 해당연도의 agg_vol_sum을 upsert 한다.
 func upsert_sum(v model.AggVolSum) {
 	filter := bson.M{"code": v.Code, "year": v.Year}
 	opts := options.ReplaceOptions{}
@@ -191,7 +194,7 @@ func upsert_sum(v model.AggVolSum) {
 	}
 }
 
-//5. 코드별 전체연도의 agg_vol_sum을 조회한다.
+//4. 코드별 전체연도의 agg_vol_sum을 조회한다.
 func select_total_agg_vol_sum(code string) []model.AggVolSum {
 	var res []model.AggVolSum
 
@@ -212,7 +215,7 @@ func select_total_agg_vol_sum(code string) []model.AggVolSum {
 	return res
 }
 
-//6. 코드별 코드의 전체연도의 agg_vol_sum데이터로 기간별 퍼센트 값목록을 구한다.
+//5.1 표준편차를 구한다.
 //(방법: https://namu.wiki/w/표준편차 )
 func get_percent(list []model.AggVolSum) model.AggVol {
 	var res model.AggVol
@@ -241,6 +244,7 @@ func get_percent(list []model.AggVolSum) model.AggVol {
 	return res
 }
 
+//5.2 빈도를 분석한다.
 func getFrequencyAnalysis(ov model.ObservationValueType, data map[int]int) map[int]model.FrequencyTableRow {
 	item := make(map[int]model.FrequencyTableRow)
 
@@ -262,7 +266,7 @@ func getFrequencyAnalysis(ov model.ObservationValueType, data map[int]int) map[i
 	return item
 }
 
-// 6-1 관찰값들의 평균을 구한다. (편차값을 구하기 위해서)
+// 5.1.1 관찰값들의 평균을 구한다. (편차값을 구하기 위해서)
 func get_avg_ObservationValue(ov model.ObservationValueType, list []model.AggVolSum) (avg int, data map[int]int) {
 	data = make(map[int]int)
 
@@ -294,7 +298,6 @@ func get_deviation(ov model.ObservationValueType, avg int, list []model.AggVolSu
 	return res
 }
 
-//
 /*
 6-3 표준편차를 구한다.
   편차들의 '제곱'을 구한 뒤 그 편차들의 제곱의 평균을 구해서 나온 값[5]에
@@ -316,6 +319,8 @@ func get_standard_deviation(deviation_list []int) (standard_deviation float64, s
 
 	return standard_deviation, square_avg
 }
+
+//6. 코드별 코드의 전체연도의 기간별 표준편차를 저장한다.
 func upsert_agg_vol(item model.AggVol) {
 
 	filter := bson.M{"code": item.Code}
