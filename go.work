@@ -4,3 +4,5 @@ use ./src/common
 use ./src/task/fetch
 use ./src/task/asmb/line
 use ./src/task/asmb/agg
+use ./src/task/logs
+use ./src/ticker
