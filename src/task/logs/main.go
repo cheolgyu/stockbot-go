@@ -36,7 +36,6 @@ type RecvInfo struct {
 }
 
 func logging(w http.ResponseWriter, req *http.Request) {
-	log.Println(" exec logging===============")
 	log := LogInfo{}
 	log.RecvInfo.Time = time.Now().String()
 	log.RecvInfo.RemoteAddr = req.RemoteAddr
