@@ -54,7 +54,7 @@ type ment struct {
 
 func (o *ment) start() {
 
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Second * 60)
 	o.ticker = *ticker
 	o.execed = map[string]bool{}
 
@@ -80,7 +80,7 @@ func (o *ment) loop() {
 			case3 := is_work_day
 
 			// p := fmt.Println
-			// debug_time := time.Date(utc_t.Year(), utc_t.Month(), utc_t.Day(), utc_t.Hour(), utc_t.Minute(), utc_t.Second()+1, 0, time.UTC)
+			// debug_time := time.Date(utc_t.Year(), utc_t.Month(), utc_t.Day(), utc_t.Hour(), utc_t.Minute()+1, utc_t.Second(), 0, time.UTC)
 			// debug_case1 := debug_time.After(utc_t)
 			// debug_case2 := !o.execed[execed_key]
 			// debug_case3 := !is_work_day
