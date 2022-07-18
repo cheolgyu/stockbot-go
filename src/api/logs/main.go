@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	syslog "log"
 	"net/http"
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
-	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -23,12 +23,12 @@ func init() {
 }
 func main() {
 	http.HandleFunc("/logging", logging)
-	log.Println(http.ListenAndServe(":5000", nil))
+	syslog.Println(http.ListenAndServe(":5000", nil))
 }
 
 type LogInfo struct {
-	model.LOG `bson:"inline"`
-	RecvInfo  `bson:"inline"`
+	mlog.LOG `bson:"inline"`
+	RecvInfo `bson:"inline"`
 }
 type RecvInfo struct {
 	Time       string      `bson:"recv_time" `
@@ -55,7 +55,7 @@ func logging(w http.ResponseWriter, req *http.Request) {
 func insert(loginfo LogInfo) {
 	_, err := logs_collection.InsertOne(context.TODO(), loginfo)
 	if err != nil {
-		log.Fatalln(err)
+		syslog.Fatalln(err)
 
 	}
 

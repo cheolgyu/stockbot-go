@@ -7,6 +7,7 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/schollz/progressbar/v3"
 	"go.mongodb.org/mongo-driver/bson"
@@ -103,6 +104,7 @@ func chk_year_agg_vol_sum(code string) (year int) {
 			year = 0
 			noDocument = true
 		} else {
+			mlog.Err(mlog.AggVol, err)
 			panic(err)
 		}
 	}
@@ -110,6 +112,7 @@ func chk_year_agg_vol_sum(code string) (year int) {
 	if !noDocument {
 		var results []model.AggVolSum
 		if err = cursor.All(context.TODO(), &results); err != nil {
+			mlog.Err(mlog.AggVol, err)
 			panic(err)
 		}
 		year = results[0].Year
@@ -151,10 +154,12 @@ func select_price_eq_year(code string, year int) (prices []model.PriceMarket) {
 
 	cursor, err := collection_price.Aggregate(context.TODO(), pipeline)
 	if err != nil {
+		mlog.Err(mlog.AggVol, err)
 		panic(err)
 	}
 
 	if err = cursor.All(context.TODO(), &prices); err != nil {
+		mlog.Err(mlog.AggVol, err)
 		panic(err)
 	}
 
@@ -204,11 +209,13 @@ func select_total_agg_vol_sum(code string) []model.AggVolSum {
 	opts.SetSort(sort)
 	cur, err := collection_agg_vol_sum.Find(context.TODO(), filter, opts)
 	if err != nil {
+		mlog.Err(mlog.AggVol, err)
 		panic(err)
 	}
 
 	err = cur.All(context.TODO(), &res)
 	if err != nil {
+		mlog.Err(mlog.AggVol, err)
 		panic(err)
 	}
 
@@ -329,6 +336,7 @@ func upsert_agg_vol(item model.AggVol) {
 
 	_, error := collection_agg_vol.ReplaceOne(context.TODO(), filter, item, &opts)
 	if error != nil {
+		mlog.Err(mlog.AggVol, error)
 		panic(error)
 	}
 }

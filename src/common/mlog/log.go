@@ -1,4 +1,4 @@
-package model
+package mlog
 
 import (
 	"bytes"
@@ -10,6 +10,11 @@ import (
 	"sync"
 	"time"
 )
+
+func send(inp LOG) {
+	go inp.reqeust()
+	go check()
+}
 
 type LOG struct {
 	Who     string
@@ -26,22 +31,39 @@ const LOG_WHAT_ERROR = "error"
 const LOG_HOW_WHAT_START = "start"
 const LOG_HOW_WHAT_END = "end"
 
+type WHO string
+
+const (
+	Fetch     WHO = "fetch"
+	AggVol    WHO = "agg_vol"
+	LineBound WHO = "line_bound"
+	LineYmxb  WHO = "line_ymxb"
+	Ticker    WHO = "ticker"
+)
+
 var WaitLog sync.WaitGroup
 var resp_ch chan *http.Response
 
 func init() {
 	resp_ch = make(chan *http.Response)
 }
-func (o LOG) Log(a ...any) {
-	if len(a) == 1 {
-		o.What = LOG_WHAT_INFO
-		o.Content = a[0]
-	} else if len(a) > 1 {
+func Info(who WHO, v ...any) {
+	l := LOG{
+		Who:     string(who),
+		What:    LOG_WHAT_INFO,
+		When:    time.Now(),
+		Content: fmt.Sprint(v...)}
 
-	}
-	o.When = time.Now()
-	go o.reqeust()
-	go check()
+	send(l)
+}
+
+func Err(who WHO, v ...any) {
+	l := LOG{
+		Who:     string(who),
+		What:    LOG_WHAT_ERROR,
+		When:    time.Now(),
+		Content: fmt.Sprint(v...)}
+	send(l)
 }
 
 func check() {

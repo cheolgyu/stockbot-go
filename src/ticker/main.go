@@ -6,18 +6,13 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
 )
 
-var mLogStuct model.LOG
 var marekts []MarketInfo
-var mlog func(a ...any)
-
-const WHO = "ticker"
 
 func init() {
-	mLogStuct.Who = WHO
-	mlog = mLogStuct.Log
 	set_markets()
 }
 func set_markets() {
@@ -40,7 +35,6 @@ func set_markets() {
 }
 
 func main() {
-	mlog("main start")
 
 	m := ment{}
 	m.start()
@@ -121,7 +115,7 @@ func start(c model.Country) {
 	}
 }
 func exec_kr() {
-	mlog("exec_kr")
+	mlog.Info(mlog.Ticker, "exec_kr")
 	//회사정보
 	command("fetch")
 	//가격정보
@@ -133,7 +127,7 @@ func exec_kr() {
 
 }
 func command(name string) {
-	mlog("command start:", name)
+	mlog.Info(mlog.Ticker, "command:", name)
 	cmd := exec.Command(name)
 	err := cmd.Run()
 	if err != nil {
@@ -141,5 +135,5 @@ func command(name string) {
 	}
 }
 func exec_us() {
-	mlog("exec_us")
+	mlog.Info(mlog.Ticker, "exec_us")
 }

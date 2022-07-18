@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/task/asmb/agg/vol"
 )
 
 func main() {
-	log.Println("i am agg")
+	mlog.Info(mlog.AggVol, "main start")
 	vol.Run()
 }
