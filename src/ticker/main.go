@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"time"
 
@@ -35,9 +36,20 @@ func set_markets() {
 }
 
 func main() {
+	if len(os.Args) > 0 {
 
-	m := ment{}
-	m.start()
+		pwd := exec.Command("pwd")
+		o, err := pwd.Output()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(o))
+
+		exec_kr()
+	} else {
+		m := ment{}
+		m.start()
+	}
 }
 
 //"2006-01-02_15_04_05"
@@ -117,12 +129,12 @@ func start(c model.Country) {
 func exec_kr() {
 	mlog.Info(mlog.Ticker, "exec_kr")
 	//회사정보
-	command("fetch")
+	command("./fetch")
 	//가격정보
-	command("asmb_line")
+	command("./asmb_line")
 	//가격정보	bound
 	//가격정보	bound	y=xm+b
-	command("asmb_agg")
+	command("./asmb_agg")
 	//가격정보	agg_vol
 
 }

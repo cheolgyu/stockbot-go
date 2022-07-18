@@ -127,7 +127,8 @@ func (o *BoundLine) Insert() {
 		log.Fatal(err)
 	}
 	fmt.Printf(
-		"inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+		"BoundLine %v inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+		o.Code,
 		res.InsertedCount,
 		res.UpsertedCount,
 		res.ModifiedCount,

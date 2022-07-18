@@ -69,9 +69,11 @@ func Run() {
 			}
 
 			prices := select_price_eq_year(v.Code.Code, year_item)
-			agg_vol_sum := sum(prices)
-			agg_vol_sum.Calculate()
-			upsert_sum(agg_vol_sum)
+			if len(prices) != 0 {
+				agg_vol_sum := sum(prices)
+				agg_vol_sum.Calculate()
+				upsert_sum(agg_vol_sum)
+			}
 
 		}
 

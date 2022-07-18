@@ -36,20 +36,20 @@ type RecvInfo struct {
 }
 
 func logging(w http.ResponseWriter, req *http.Request) {
-	log := LogInfo{}
-	log.RecvInfo.Time = time.Now().String()
-	log.RecvInfo.RemoteAddr = req.RemoteAddr
+	loginfo := LogInfo{}
+	loginfo.RecvInfo.Time = time.Now().String()
+	loginfo.RecvInfo.RemoteAddr = req.RemoteAddr
 
-	err := json.NewDecoder(req.Body).Decode(&log.LOG)
+	err := json.NewDecoder(req.Body).Decode(&loginfo.LOG)
 	if err != nil {
 		fmt.Printf("json error : %+v \n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 
 	}
+	fmt.Println("%#v", loginfo)
+	fmt.Fprintf(w, "%+v \n", loginfo)
 
-	fmt.Fprintf(w, "%+v \n", log)
-
-	insert(log)
+	insert(loginfo)
 }
 
 func insert(loginfo LogInfo) {

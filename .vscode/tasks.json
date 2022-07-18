@@ -8,7 +8,7 @@
                 "isDefault": true
             },
             "dependsOn": [
-                "build task/logs",
+                "build api/logs",
                 "build task/fetch",
                 "build task/asmb/line",
                 "build task/asmb/agg",
@@ -16,9 +16,15 @@
             ]
         },
         {
-            "label": "build task/logs",
+            "label": "build api/logs",
             "type": "shell",
-            "command": "go build -o ${workspaceFolder}/bin/logs ${workspaceFolder}/src/task/logs/main.go",
+            "options": {
+                "env": {
+                    "GOOS": "linux",
+                    "GOARCH": "amd64"
+                }
+            },
+            "command": " go build -o ${workspaceFolder}/bin/logs_srv ${workspaceFolder}/src/api/logs/main.go",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -28,6 +34,12 @@
         {
             "label": "build task/fetch",
             "type": "shell",
+            "options": {
+                "env": {
+                    "GOOS": "linux",
+                    "GOARCH": "amd64"
+                }
+            },
             "command": "go build -o ${workspaceFolder}/bin/fetch ${workspaceFolder}/src/task/fetch/main.go",
             "problemMatcher": [],
             "group": {
@@ -38,6 +50,12 @@
         {
             "label": "build task/asmb/line",
             "type": "shell",
+            "options": {
+                "env": {
+                    "GOOS": "linux",
+                    "GOARCH": "amd64"
+                }
+            },
             "command": "go build -o ${workspaceFolder}/bin/asmb_line ${workspaceFolder}/src/task/asmb/line/main.go",
             "problemMatcher": [],
             "group": {
@@ -48,6 +66,12 @@
         {
             "label": "build task/asmb/agg",
             "type": "shell",
+            "options": {
+                "env": {
+                    "GOOS": "linux",
+                    "GOARCH": "amd64"
+                }
+            },
             "command": "go build -o ${workspaceFolder}/bin/asmb_agg ${workspaceFolder}/src/task/asmb/agg/main.go",
             "problemMatcher": [],
             "group": {
@@ -58,10 +82,29 @@
         {
             "label": "build ticker",
             "type": "shell",
+            "options": {
+                "env": {
+                    "GOOS": "linux",
+                    "GOARCH": "amd64"
+                }
+            },
             "command": "go build -o ${workspaceFolder}/bin/ticker ${workspaceFolder}/src/ticker/main.go",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run api/logs",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/src/api/logs"
+            },
+            "command": "go run main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
                 "isDefault": true
             }
         }
