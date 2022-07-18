@@ -1,6 +1,8 @@
 package bound
 
 import (
+	"context"
+
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
@@ -8,9 +10,13 @@ import (
 )
 
 var client *mongo.Client
+var bound_collection *mongo.Collection
+var price_collection *mongo.Collection
 
 func init() {
 	client, _ = common.Connect()
+	bound_collection = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
+	price_collection = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 }
 
 type Run struct {
@@ -18,6 +24,8 @@ type Run struct {
 }
 
 func (o *Run) Run() {
+	defer client.Disconnect(context.TODO())
+
 	o.code = doc.GetCodes(client, model.KR)
 	for _, v := range o.code {
 

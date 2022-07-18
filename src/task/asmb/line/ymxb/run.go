@@ -14,10 +14,13 @@ import (
 )
 
 var client *mongo.Client
-var ctx context.Context
+var collection_boud_point *mongo.Collection
+var collection_price *mongo.Collection
+var collection_ymxb_quote_unit *mongo.Collection
+var collection_ymxb *mongo.Collection
 
 func init() {
-	client, ctx = common.Connect()
+	client, _ = common.Connect()
 }
 
 /*
@@ -55,11 +58,12 @@ type ymxb struct {
 }
 
 func Run() {
-	defer client.Disconnect(ctx)
-	collection_boud_point := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
-	collection_price := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
-	collection_ymxb_quote_unit := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
-	collection_ymxb := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
+	defer client.Disconnect(context.TODO())
+
+	collection_boud_point = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
+	collection_price = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+	collection_ymxb_quote_unit = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
+	collection_ymxb = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
 
 	company := doc.GetCompany(client)
 	var list []interface{}
@@ -75,12 +79,12 @@ func Run() {
 				price_type:  v,
 			}
 
-			i.setP2_last_price(collection_price)
-			i.setP1_last_bound(collection_boud_point)
+			i.setP2_last_price()
+			i.setP1_last_bound()
 
 			// p1점이 없는 경우
 			if i.p1.X != 0 {
-				i.setM(collection_price, collection_ymxb_quote_unit)
+				i.setM()
 				list = append(list, model.Ymxb{
 					Code:      i.code,
 					YmxbType:  model.YmxbType1,
@@ -114,48 +118,47 @@ func errHandler(inp error, v ...interface{}) {
 	}
 }
 
-func (o *ymxb) setP1_last_bound(coll *mongo.Collection) {
+func (o *ymxb) setP1_last_bound() {
 
 	projection := bson.M{"_id": 0, "x": "$p2.x", "y": "$p2.y"}
 	filter := bson.M{"code": o.code, "p2.x": bson.M{"$lt": o.p2.X}, "price_type": o.price_type}
 	opts := options.FindOne().SetSort(bson.M{"p2.x": -1}).SetProjection(projection)
 
-	err := coll.FindOne(context.TODO(), filter, opts).Decode(&o.p1)
+	err := collection_boud_point.FindOne(context.TODO(), filter, opts).Decode(&o.p1)
 	if err != nil && mongo.ErrNoDocuments != err {
 		log.Println("????", err)
 		errHandler(err, o, "setP1")
 	}
 
 }
-func (o *ymxb) setP2_last_price(coll *mongo.Collection) {
+func (o *ymxb) setP2_last_price() {
 
 	projection := bson.M{"_id": 0, "x": "$dt", "y": "$" + o.price_type.String_DB_Field()}
 	filter := bson.M{"code": o.code}
 	opts := options.FindOne().SetSort(bson.M{"dt": -1}).SetProjection(projection)
 
-	err := coll.FindOne(context.TODO(), filter, opts).Decode(&o.p2)
+	err := collection_price.FindOne(context.TODO(), filter, opts).Decode(&o.p2)
 	errHandler(err, o, "setP2")
 
 }
 
-func (o *ymxb) setM(coll_price *mongo.Collection, coll_ymxb_quote_unit *mongo.Collection) {
-
+func (o *ymxb) setM() {
 	filter := bson.M{"code": o.code, "dt": bson.M{"$lte": o.p1.X}}
-	p1x, err := coll_price.CountDocuments(context.TODO(), filter)
+	p1x, err := collection_price.CountDocuments(context.TODO(), filter)
 	errHandler(err, o, "setM", "o.p1.x")
 
 	filter = bson.M{"code": o.code, "dt": bson.M{"$lte": o.p2.X}}
-	p2x, err := coll_price.CountDocuments(context.TODO(), filter)
+	p2x, err := collection_price.CountDocuments(context.TODO(), filter)
 	errHandler(err, o, "setM", "o.p2.x")
 
 	tp1y := model.Unit_quote{}
 	tp2y := model.Unit_quote{}
 	filter2 := bson.M{"market": o.market_code, "price": o.p1.Y}
-	err = coll_ymxb_quote_unit.FindOne(context.TODO(), filter2).Decode(&tp1y)
+	err = collection_ymxb_quote_unit.FindOne(context.TODO(), filter2).Decode(&tp1y)
 	errHandler(err, o, "setM", "o.p1.y")
 
 	filter2 = bson.M{"market": o.market_code, "price": o.p2.Y}
-	err = coll_ymxb_quote_unit.FindOne(context.TODO(), filter2).Decode(&tp2y)
+	err = collection_ymxb_quote_unit.FindOne(context.TODO(), filter2).Decode(&tp2y)
 	errHandler(err, o, "setM", "o.p2.y")
 
 	o.tp1x = float64(p1x)
@@ -176,7 +179,7 @@ func (o *ymxb) setM(coll_price *mongo.Collection, coll_ymxb_quote_unit *mongo.Co
 	opts := options.FindOne()
 
 	tp3 := model.Unit_quote{}
-	err = coll_ymxb_quote_unit.FindOne(context.TODO(), filter2, opts).Decode(&tp3)
+	err = collection_ymxb_quote_unit.FindOne(context.TODO(), filter2, opts).Decode(&tp3)
 	errHandler(err, o, "setM", "tp3")
 
 	o.p3.Y = float32(tp3.Price)

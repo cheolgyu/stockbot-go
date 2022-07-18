@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cheolgyu/stockbot/src/common"
-	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,14 +21,11 @@ type BoundLine struct {
 
 func (o *BoundLine) GetStartingPoint() {
 
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
-
 	projection := bson.M{"_id": 0, "x": "$p2.x", "y": "$p2.y"}
 	filter := bson.M{"code": o.Code, "price_type": o.PriceType}
 	opts := options.FindOne().SetSort(bson.M{"p2.x": -1}).SetProjection(projection)
 
-	err := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT).FindOne(ctx, filter, opts).Decode(&o.startingPoint)
+	err := bound_collection.FindOne(context.TODO(), filter, opts).Decode(&o.startingPoint)
 	if err != nil {
 		switch err {
 		case mongo.ErrNoDocuments:
@@ -45,17 +40,15 @@ func (o *BoundLine) GetStartingPoint() {
 
 func (o *BoundLine) GetAfterStartingPointPipeline() {
 	var res []model.Point
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
 
 	matchStage := bson.D{{"$match", bson.D{{"code", o.Code}, {"dt", bson.D{{"$gt", o.startingPoint.X}}}}}}
 	projectStage := bson.D{{"$project", bson.D{{"_id", 0}, {"x", "$dt"}, {"y", "$" + o.PriceType.String_DB_Field()}}}}
 	sortStage := bson.D{{"$sort", bson.D{{"dt", 1}}}}
 
-	cursor, err := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE).Aggregate(ctx, mongo.Pipeline{matchStage, projectStage, sortStage})
-	defer cursor.Close(ctx)
+	cursor, err := price_collection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, sortStage})
+	defer cursor.Close(context.TODO())
 
-	if err = cursor.All(ctx, &res); err != nil {
+	if err = cursor.All(context.TODO(), &res); err != nil {
 		log.Panicln(err.Error())
 	}
 
@@ -120,9 +113,6 @@ func (o *BoundLine) SetBoundPoint() {
 }
 
 func (o *BoundLine) Insert() {
-	client, ctx := common.Connect()
-	defer client.Disconnect(ctx)
-	collection := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
 
 	models := []mongo.WriteModel{}
 
@@ -132,7 +122,7 @@ func (o *BoundLine) Insert() {
 	}
 
 	opts := options.BulkWrite().SetOrdered(false)
-	res, err := collection.BulkWrite(context.TODO(), models, opts)
+	res, err := bound_collection.BulkWrite(context.TODO(), models, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
