@@ -1,0 +1,69 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build all",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "build task/logs",
+                "build task/fetch",
+                "build task/asmb/line",
+                "build task/asmb/agg",
+                "build ticker"
+            ]
+        },
+        {
+            "label": "build task/logs",
+            "type": "shell",
+            "command": "go build -o ${workspaceFolder}/bin/logs ${workspaceFolder}/src/task/logs/main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build task/fetch",
+            "type": "shell",
+            "command": "go build -o ${workspaceFolder}/bin/fetch ${workspaceFolder}/src/task/fetch/main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build task/asmb/line",
+            "type": "shell",
+            "command": "go build -o ${workspaceFolder}/bin/asmb_line ${workspaceFolder}/src/task/asmb/line/main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build task/asmb/agg",
+            "type": "shell",
+            "command": "go build -o ${workspaceFolder}/bin/asmb_agg ${workspaceFolder}/src/task/asmb/agg/main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build ticker",
+            "type": "shell",
+            "command": "go build -o ${workspaceFolder}/bin/ticker ${workspaceFolder}/src/ticker/main.go",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

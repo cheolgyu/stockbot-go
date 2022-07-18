@@ -1,1 +1,6 @@
 src/task/asmb/line/__debug_bin.exe
+bin/*
+bin/asmb_line
+bin/fetch
+bin/logs
+bin/ticker

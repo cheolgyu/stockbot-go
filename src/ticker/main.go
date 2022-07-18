@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os/exec"
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
@@ -121,11 +123,22 @@ func start(c model.Country) {
 func exec_kr() {
 	mlog("exec_kr")
 	//회사정보
+	command("fetch")
 	//가격정보
+	command("asmb_line")
 	//가격정보	bound
 	//가격정보	bound	y=xm+b
+	command("asmb_agg")
 	//가격정보	agg_vol
 
+}
+func command(name string) {
+	mlog("command start:", name)
+	cmd := exec.Command(name)
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 func exec_us() {
 	mlog("exec_us")
