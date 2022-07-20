@@ -1,22 +1,20 @@
 
-https://kr.investing.com/equities/StocksFilter?noconstruct=1&smlID=800&sid=&tabletype=price&index_id=14958
-###
-https://kr.investing.com/equities/StocksFilter?noconstruct=1&smlID=800&sid=&tabletype=price&index_id=all
-
-###
-https://www.investing.com/equities/StocksFilter?noconstruct=1&smlID=800&sid=&tabletype=price&index_id=all
-###
-
-
-
+curl https://translate.google.co.kr/?hl=ko
 
 //https://www.nasdaq.com/market-activity/stocks/screener
 // 전체주식목록
 ###
 
-https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&exchange=NASDAQ&download=true
+
+GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=NASDAQ
+cache-control: max-age=0
+accept: application/json
 ###
-https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&exchange=NYSE&download=true
+GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=NYSE
+cache-control: max-age=0
+accept: application/json
 ###
-https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=25&exchange=AMEX&download=true
+GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=AMEX
+cache-control: max-age=0
+accept: application/json
 ###
