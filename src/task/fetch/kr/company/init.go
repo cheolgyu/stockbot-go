@@ -18,7 +18,7 @@ func insert_market() {
 	defer client.Disconnect(ctx)
 	coll := client.Database(doc.DB_PUB).Collection(doc.DB_PUB_COLL_MARKET)
 
-	for k, v := range model.MarketType_map {
+	for k, v := range model.Exchanges[model.KR] {
 		if k != model.KONEX {
 			filter := bson.M{"code": v.Code, "country": model.KR}
 			cnt, err := coll.CountDocuments(context.TODO(), filter)

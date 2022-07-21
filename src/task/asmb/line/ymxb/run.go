@@ -38,7 +38,7 @@ func init() {
 */
 type ymxb struct {
 	code        string
-	market_code model.MarketType
+	market_code model.Exchange
 	price_type  model.PriceType
 
 	p1 model.Point
@@ -69,7 +69,7 @@ func Run() {
 	var list []interface{}
 
 	for _, c := range company {
-		market_code, err := model.String2Market(c.Market)
+		market_code, err := model.ConvertExchanges(model.KR, c.Market)
 		errHandler(err, "model.String2Market(c.Market),c.Market= ", c.Market)
 
 		for _, v := range model.PriceTypes_arr {
