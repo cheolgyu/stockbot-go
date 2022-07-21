@@ -92,11 +92,18 @@ type PriceMarket struct {
 type Country string
 
 const (
+	//전체
+	ALL Country = "all"
 	//한국
 	KR Country = "kr"
 	//미국
 	US Country = "us"
 )
+
+var Countrys = map[string]Country{
+	"kr": KR,
+	"us": US,
+}
 
 type DateInfo struct {
 	Dt      int

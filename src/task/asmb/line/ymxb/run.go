@@ -65,7 +65,7 @@ func Run() {
 	collection_ymxb_quote_unit = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
 	collection_ymxb = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
 
-	company := doc.GetCompany(client)
+	company := doc.GetCompany(client, model.ALL)
 	var list []interface{}
 
 	for _, c := range company {

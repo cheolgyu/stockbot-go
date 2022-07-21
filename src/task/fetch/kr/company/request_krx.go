@@ -11,6 +11,11 @@ import (
 	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 )
 
+func (o Req_krx) Crawling() {
+	request := Req_krx{}
+	request.Run()
+}
+
 type Req_krx struct {
 	Object string
 

@@ -1,9 +1,13 @@
 package company
 
 import (
+	"context"
 	"log"
 
+	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/fetch/dao"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 /*
@@ -16,11 +20,15 @@ type Run struct {
 	old_list map[string]model.Company
 	downlad  Req_krx
 	convert  Convert
-	insert   Insert
 }
 
+var client *mongo.Client
+
 func (o *Run) Run() {
-	o.old_list = company_map()
+	client, _ = common.Connect()
+	defer client.Disconnect(context.TODO())
+
+	o.old_list = dao.SelectMapCompany(client, model.KR)
 	log.Println("len(old_companys)=", len(o.old_list))
 
 	o.downlad = Req_krx{}
@@ -35,6 +43,5 @@ func (o *Run) Run() {
 	}
 
 	log.Println("len(merge_companys)=", len(o.old_list))
-	o.insert.Company = list
-	o.insert.Run()
+	dao.Insert(client, list)
 }

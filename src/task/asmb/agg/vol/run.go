@@ -50,7 +50,7 @@ func Run() {
 
 	t := time.Now()
 	cur_year := t.Year()
-	companys := doc.GetCompany(client)
+	companys := doc.GetCompany(client, model.ALL)
 
 	bar := progressbar.Default(int64(len(companys)))
 

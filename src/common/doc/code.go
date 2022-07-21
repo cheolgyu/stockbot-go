@@ -10,9 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func GetCompany(client *mongo.Client) []model.Company {
+func GetCompany(client *mongo.Client, country model.Country) []model.Company {
+	filter := bson.M{}
+	if country != model.ALL {
+		filter = bson.M{
+			"country": country,
+		}
+	}
 
-	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(context.TODO(), bson.M{})
+	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(context.TODO(), filter)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,6 +34,12 @@ func GetCodes(client *mongo.Client, country model.Country) []model.Code {
 	opts := options.Find().SetProjection(bson.M{"code": 1, "name": 1})
 	// filter := bson.M{"country": country}
 	filter := bson.M{}
+	if country != model.ALL {
+		filter = bson.M{
+			"country": country,
+		}
+	}
+
 	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_COMPANY).Find(context.TODO(), filter, opts)
 	if err != nil {
 		log.Fatal(err)
@@ -42,7 +54,12 @@ func GetCodes(client *mongo.Client, country model.Country) []model.Code {
 
 func GetCodesMarket(client *mongo.Client, country model.Country) []model.Code {
 	opts := options.Find().SetProjection(bson.M{"code": 1, "name": 1})
-	filter := bson.M{"country": country}
+	filter := bson.M{}
+	if country != model.ALL {
+		filter = bson.M{
+			"country": country,
+		}
+	}
 
 	cursor, err := client.Database(DB_PUB).Collection(DB_PUB_COLL_MARKET).Find(context.TODO(), filter, opts)
 	if err != nil {
