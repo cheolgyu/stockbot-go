@@ -7,7 +7,7 @@ import (
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/us"
+	"github.com/cheolgyu/stockbot/src/fetch/company"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -18,7 +18,7 @@ func init() {
 func main() {
 	log.Println("i am fetch")
 	//kr.Run()
-	us.Run()
+	company.Run()
 }
 
 func insert_Exchanges() {

@@ -11,42 +11,15 @@ import (
 )
 
 type Convert struct {
-	Old map[string]model.Company
+	List map[string]model.Company
 }
 
 func (o *Convert) Run() {
+	o.List = make(map[string]model.Company)
+
 	o.run_detail()
 	o.run_state()
-}
 
-func (o *Convert) update(upsert_cmp model.Company, converting_detail bool) {
-	om, exist := o.Old[upsert_cmp.Code.Code]
-
-	if exist {
-		if converting_detail {
-			om.Detail = upsert_cmp.Detail
-		} else {
-			om.State = upsert_cmp.State
-		}
-	} else {
-		//new code
-		if converting_detail {
-			om = upsert_cmp
-			om.Country = model.KR
-		} else {
-			//detail 파일에는 있고 state 파일에만 있는 코드 등장
-			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")
-		}
-
-	}
-
-	if converting_detail {
-		om.Detail = upsert_cmp.Detail
-	} else {
-		om.State = upsert_cmp.State
-	}
-
-	o.Old[upsert_cmp.Code.Code] = om
 }
 
 func (o *Convert) run_state() {
@@ -62,7 +35,9 @@ func (o *Convert) run_state() {
 		row := sheet.Row(i)
 		_, content := rowGet(row)
 		state := stringToCompanyState(content)
-		o.update(state, false)
+		tmp := o.List[state.Code.Code]
+		tmp.State = state.State
+		o.List[state.Code.Code] = tmp
 	}
 }
 
@@ -79,7 +54,7 @@ func (o *Convert) run_detail() {
 		row := sheet.Row(i)
 		_, content := rowGet(row)
 		detail := stringToCompanyDetail(content)
-		o.update(detail, true)
+		o.List[detail.Code.Code] = detail
 	}
 }
 

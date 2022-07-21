@@ -6,32 +6,40 @@ import (
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/dao"
+	kr_company "github.com/cheolgyu/stockbot/src/fetch/kr/company"
+	us_company "github.com/cheolgyu/stockbot/src/fetch/us/company"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type CrawlingExchange struct {
-	model.Country
-}
-
 type Crawling interface {
-	Save()
+	Request()
+	GetCompany() []model.Company
 }
 
 var client *mongo.Client
 
 func Run() {
+
 	client, _ = common.Connect()
 	defer client.Disconnect(context.TODO())
+
 	for _, country := range model.Countrys {
 		current := dao.SelectMapCompany(client, country)
-		ce := CrawlingExchange{country}
-		ce
+
+		var crawling Crawling
+		switch country {
+		case model.KR:
+			crawling = &kr_company.Req_krx{}
+		case model.US:
+			crawling = &us_company.NasdaqCom{}
+		}
+
+		crawling.Request()
+		incoming := crawling.GetCompany()
+		merge_list := merge(country, current, incoming)
+
+		dao.Insert(client, merge_list)
 	}
-
-	// incoming :=
-	// merge :=
-	// insert
-
 }
 
 func merge(country model.Country, current map[string]model.Company, incoming []model.Company) []model.Company {

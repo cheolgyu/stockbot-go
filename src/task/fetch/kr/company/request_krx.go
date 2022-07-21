@@ -8,12 +8,26 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 )
 
-func (o Req_krx) Crawling() {
-	request := Req_krx{}
-	request.Run()
+func (o *Req_krx) Request() {
+	req_krx := Req_krx{}
+	req_krx.Run()
+}
+
+func (o *Req_krx) GetCompany() []model.Company {
+	var list []model.Company
+
+	convert := Convert{}
+	convert.Run()
+
+	for _, v := range convert.List {
+		list = append(list, v)
+	}
+
+	return list
 }
 
 type Req_krx struct {

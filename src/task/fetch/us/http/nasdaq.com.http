@@ -1,6 +1,3 @@
-
-curl https://translate.google.co.kr/?hl=ko
-
 //https://www.nasdaq.com/market-activity/stocks/screener
 // 전체주식목록
 ###
@@ -9,12 +6,15 @@ curl https://translate.google.co.kr/?hl=ko
 GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=NASDAQ
 cache-control: max-age=0
 accept: application/json
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36
 ###
 GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=NYSE
 cache-control: max-age=0
 accept: application/json
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36
 ###
 GET https://api.nasdaq.com/api/screener/stocks?&download=true&exchange=AMEX
 cache-control: max-age=0
 accept: application/json
+user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36
 ###
