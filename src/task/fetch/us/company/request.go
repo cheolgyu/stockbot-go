@@ -1,35 +1,47 @@
 package company
 
 import (
-	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/fetch/file"
 )
 
 var Addr string = "https://api.nasdaq.com/api/screener/stocks?&download=true&exchange="
 
 type NasdaqCom struct {
-	NADAQ interface{}
-	NYSE  interface{}
-	AMEX  interface{}
 }
 
+const FILE_DIR_US = file.FILE_DIR + "/us" + "/company/"
+
 func (o *NasdaqCom) Request() {
+
+	file.Mkdir([]string{FILE_DIR_US})
+
+	fmt.Sprintf("%#v", model.Exchanges[model.US])
+	log.Println(model.Exchanges[model.US])
+
 	for k, _ := range model.Exchanges[model.US] {
+		fmt.Sprintf("%#v", k)
 		switch k {
 		case model.NASDAQ:
-			o.NADAQ = request(Addr + "NASDAQ")
+			request(Addr+"NASDAQ", model.NASDAQ)
 		case model.NYSE:
-			o.NYSE = request(Addr + "NYSE")
+			request(Addr+"NYSE", model.NYSE)
 		case model.AMEX:
-			o.AMEX = request(Addr + "AMEX")
+			request(Addr+"AMEX", model.AMEX)
 		}
 	}
 }
 
-func request(url string) interface{} {
+func request(url string, exchange model.Exchange) {
+	fnm := FILE_DIR_US + model.Exchanges[model.US][exchange].Code
+	file := file.CreateFile(fnm)
+	defer file.Close()
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
@@ -47,10 +59,12 @@ func request(url string) interface{} {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	var target interface{}
-	// 결과 출력
-	json.NewDecoder(resp.Body).Decode(target)
-	return target
+	size, err := io.Copy(file, resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("filenm=", fnm, ",size=", size)
+
 }
 
 func (o *NasdaqCom) GetCompany() []model.Company {

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/file"
@@ -93,7 +92,7 @@ func (o *Req_krx) Run() {
 
 func (o *Req_krx) down_file() {
 	// 파일명
-	file := createFile(o.saveNm)
+	file := file.CreateFile(o.saveNm)
 
 	reqBody := bytes.NewBufferString("code=" + o.code)
 	resp, err := http.Post(o.urlData, "application/x-www-form-urlencoded", reqBody)
@@ -133,16 +132,4 @@ func (o *Req_krx) down_code() string {
 	var str_resp = string(respBody)
 
 	return str_resp
-}
-
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
-func createFile(fileName string) *os.File {
-	file, err := os.Create(fileName)
-	checkError(err)
-	return file
 }

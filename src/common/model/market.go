@@ -54,9 +54,9 @@ var Exchanges = map[Country]map[Exchange]Code{
 		KONEX:  {"KONEX", "코넥스"},
 	},
 	US: {
-		KOSPI:  {"NASDAQ", "나스닥"},
-		KOSDAQ: {"NYSE", "뉴욕증권거래소"},
-		KONEX:  {"AMEX", "아멕스"},
+		NASDAQ: {"NASDAQ", "나스닥"},
+		NYSE:   {"NYSE", "뉴욕증권거래소"},
+		AMEX:   {"AMEX", "아멕스"},
 	}}
 
 func ConvertExchanges(country Country, code string) (Exchange, error) {
