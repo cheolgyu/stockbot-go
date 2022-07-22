@@ -10,7 +10,7 @@ import (
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,6 +18,9 @@ import (
 var client *mongo.Client
 var ctx context.Context
 var collectionPrice *mongo.Collection
+
+//custom := now.Format("2006-01-02 15:04:05")
+const PRICE_DATE_FORMAT = "20060102"
 
 func init() {
 	client, ctx = common.Connect()
@@ -27,6 +30,7 @@ func init() {
 }
 
 type Run struct {
+	Downlad  bool
 	code     []model.Code
 	_        Insert
 	openings []interface{}
@@ -73,7 +77,7 @@ func (o *Run) setDate_StartEnd() {
 
 	defer cursor.Close(ctx)
 
-	o.endDate = time.Now().Format(config.PRICE_DATE_FORMAT)
+	o.endDate = time.Now().Format(PRICE_DATE_FORMAT)
 }
 
 /*
@@ -94,6 +98,7 @@ func (o *Run) Run() {
 		run_code := RunCode{code: v}
 
 		run_code.download = naverChart{
+			DownLoad:  o.Downlad,
 			startDate: o.startDate[run_code.code.Code],
 			endDate:   o.endDate,
 			Code:      v,

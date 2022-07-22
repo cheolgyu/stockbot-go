@@ -13,10 +13,11 @@ import (
 	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
+	"github.com/cheolgyu/stockbot/src/fetch/file"
 )
 
 type naverChart struct {
+	DownLoad  bool
 	startDate string
 	endDate   string
 	model.Code
@@ -26,19 +27,22 @@ type naverChart struct {
 	Openings map[int]int
 }
 
+const PRICE_DEFAULT_START_DATE = "19560303"
+const URL_PRICE = "https://api.finance.naver.com/siseJson.naver?symbol=%s&requestType=1&startTime=%s&endTime=%s&timeframe=day"
+const FILE_DIR_PRICE = file.FILE_DIR + "/kr/price/"
+const FILE_DIR_MARKET = file.FILE_DIR + "/kr/market/"
+
 func (o *naverChart) ready() {
-	// if o.Code.Code.Code_type == config.Config["stock"] {
-	// 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
-	// } else if o.Code.Code.Code_type == config.Config["market"] {
-	// 	o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
-	// }
-	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+
+	file.Mkdir([]string{FILE_DIR_PRICE, FILE_DIR_MARKET})
+
+	o.fnm = FILE_DIR_PRICE + o.Code.Code
 
 	if o.startDate == "" {
-		o.startDate = config.PRICE_DEFAULT_START_DATE
+		o.startDate = PRICE_DEFAULT_START_DATE
 	}
 
-	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.startDate, o.endDate)
+	o.url = fmt.Sprintf(URL_PRICE, o.Code.Code, o.startDate, o.endDate)
 	o.Openings = make(map[int]int)
 
 }
@@ -47,7 +51,7 @@ func (o *naverChart) Run() ([]model.PriceMarket, error) {
 	var err error = nil
 
 	o.ready()
-	if config.DownloadPrice {
+	if o.DownLoad {
 		err_down := o.Download()
 		if err_down != nil {
 			log.Fatalln(err_down)

@@ -6,6 +6,6 @@ import (
 
 func Run() {
 
-	pr := price.Run{}
+	pr := price.Run{Downlad: true}
 	pr.Run()
 }

@@ -29,7 +29,7 @@ func Run() {
 		var crawling Crawling
 		switch country {
 		case model.KR:
-			crawling = &kr_company.Req_krx{}
+			crawling = &kr_company.Req_krx{Download: true}
 		case model.US:
 			crawling = &us_company.NasdaqCom{}
 		}

@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"github.com/tealeg/xlsx"
 )
+
+const XLSX_SPLIT = "!,_"
 
 type Convert struct {
 	List map[string]model.Company
@@ -24,7 +25,7 @@ func (o *Convert) Run() {
 
 func (o *Convert) run_state() {
 
-	xlFile, err := xlsx.OpenFile(config.DOWNLOAD_COMPANY_STATE)
+	xlFile, err := xlsx.OpenFile(FILE_COMPANY_STATE)
 	if err != nil {
 		log.Fatalln("run_state 오류발생", err)
 	}
@@ -43,7 +44,7 @@ func (o *Convert) run_state() {
 
 func (o *Convert) run_detail() {
 
-	xlFile, err := xlsx.OpenFile(config.DOWNLOAD_COMPANY_DETAIL)
+	xlFile, err := xlsx.OpenFile(FILE_COMPANY_DETAIL)
 	if err != nil {
 		log.Fatalln("run_detail 오류발생", err)
 	}
@@ -61,7 +62,7 @@ func (o *Convert) run_detail() {
 func rowGet(row *xlsx.Row) (string, string) {
 	txt_replace := strings.NewReplacer("'", " ")
 
-	str := fmt.Sprintf("%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s",
+	str := fmt.Sprintf("%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s",
 		txt_replace.Replace(row.Cells[0].String()),
 		txt_replace.Replace(row.Cells[1].String()),
 		txt_replace.Replace(row.Cells[2].String()),
@@ -80,7 +81,7 @@ func rowGet(row *xlsx.Row) (string, string) {
 }
 
 func stringToCompanyDetail(str string) model.Company {
-	arr := strings.Split(str, config.XLSX_SPLIT)
+	arr := strings.Split(str, XLSX_SPLIT)
 
 	cmp := model.Company{}
 
@@ -111,7 +112,7 @@ func stringToCompanyState(str string) model.Company {
 
 	ic := model.Company{}
 	o := model.CompanyState{}
-	arr := strings.Split(str, config.XLSX_SPLIT)
+	arr := strings.Split(str, XLSX_SPLIT)
 
 	txt_replace := strings.NewReplacer("'", " ")
 
