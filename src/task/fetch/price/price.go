@@ -38,6 +38,7 @@ type CrawlingPrice interface {
 //key:code, value:last_price_date
 var startDate map[string]string
 var endDate string
+var Download bool
 
 type RunCode struct {
 	code     model.Code
@@ -49,7 +50,8 @@ type RunCode struct {
 2. 종목코드로 가격데이터 다운로드
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
-func Run() {
+func Run(download bool) {
+	Download = download
 	startDate, endDate = startEnd()
 
 	for _, v := range model.Countrys {
@@ -82,7 +84,7 @@ func run_country(country model.Country) {
 			}
 		}
 
-		list, err := run_code.download.GetResult(false)
+		list, err := run_code.download.GetResult(Download)
 		if err != nil {
 			log.Panic(err)
 		}

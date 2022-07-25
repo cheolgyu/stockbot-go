@@ -5,8 +5,8 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	kr_company "github.com/cheolgyu/stockbot/src/fetch/kr/company"
-	us_company "github.com/cheolgyu/stockbot/src/fetch/us/company"
+	kr_company "github.com/cheolgyu/stockbot/src/fetch/country/kr/company"
+	us_company "github.com/cheolgyu/stockbot/src/fetch/country/us/company"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -17,7 +17,7 @@ type Crawling interface {
 
 var client *mongo.Client
 
-func Run() {
+func Run(download bool) {
 
 	client, _ = common.Connect()
 	defer client.Disconnect(context.TODO())
@@ -28,9 +28,9 @@ func Run() {
 		var crawling Crawling
 		switch country {
 		case model.KR:
-			crawling = &kr_company.Req_krx{Download: false}
+			crawling = &kr_company.Req_krx{Download: download}
 		case model.US:
-			crawling = &us_company.NasdaqCom{Download: false}
+			crawling = &us_company.NasdaqCom{Download: download}
 		}
 
 		crawling.Request()

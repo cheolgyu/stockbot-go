@@ -12,14 +12,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const DOWNLOAD_COMPANY bool = true
+const DOWNLOAD_PRICE bool = true
+
 func init() {
 	insert_Exchanges()
 }
 
 func main() {
 	log.Println("i am fetch")
-	company.Run()
-	price.Run()
+	company.Run(DOWNLOAD_COMPANY)
+	price.Run(DOWNLOAD_PRICE)
 }
 
 func insert_Exchanges() {
