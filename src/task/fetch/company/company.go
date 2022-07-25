@@ -5,7 +5,6 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/dao"
 	kr_company "github.com/cheolgyu/stockbot/src/fetch/kr/company"
 	us_company "github.com/cheolgyu/stockbot/src/fetch/us/company"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +23,7 @@ func Run() {
 	defer client.Disconnect(context.TODO())
 
 	for _, country := range model.Countrys {
-		current := dao.SelectMapCompany(client, country)
+		current := SelectMapCompany(client, country)
 
 		var crawling Crawling
 		switch country {
@@ -38,7 +37,7 @@ func Run() {
 		incoming := crawling.GetCompany()
 		merge_list := merge(country, current, incoming)
 
-		dao.Insert(client, merge_list)
+		Insert(client, merge_list)
 	}
 }
 

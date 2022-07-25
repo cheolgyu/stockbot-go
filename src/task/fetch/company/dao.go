@@ -1,4 +1,4 @@
-package dao
+package company
 
 import (
 	"context"
