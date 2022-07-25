@@ -48,6 +48,7 @@ func checkError(err error) {
 	}
 }
 
+// 기존 파일을 새로 만들어버림.
 func CreateFile(fileName string) *os.File {
 	file, err := os.Create(fileName)
 	checkError(err)

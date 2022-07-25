@@ -1,14 +1,11 @@
 package company
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/file"
+	"github.com/cheolgyu/stockbot/src/fetch/us/us_request"
 )
 
 var Addr string = "https://api.nasdaq.com/api/screener/stocks?&download=true&exchange="
@@ -46,31 +43,9 @@ func (o *NasdaqCom) Request() {
 func request(url string, exchange model.Exchange) {
 	fnm := get_fnm(exchange)
 	file := file.CreateFile(fnm)
+
+	us_request.HttpNasdaqCom(url, file)
 	defer file.Close()
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		panic(err)
-	}
-
-	//필요시 헤더 추가 가능
-	req.Header.Add("cache-control", "0")
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36")
-
-	// Client객체에서 Request 실행
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	size, err := io.Copy(file, resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("filenm=", fnm, ",size=", size)
-
 }
 
 func (o *NasdaqCom) GetCompany() []model.Company {
@@ -92,12 +67,11 @@ func convert(exchange model.Exchange) []model.Company {
 	ff := file.File{}
 
 	f := ff.Open(get_fnm(exchange))
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
-	var v map[string]map[string][]NasdaqComItem
-	json.Unmarshal(data, &v)
+	defer f.Close()
+
+	v := make(map[string]map[string][]NasdaqComItem)
+	us_request.ConvertNasdaqCom(f, &v)
+
 	arr := v["data"]["rows"]
 
 	var cmp []model.Company

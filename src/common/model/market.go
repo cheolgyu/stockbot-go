@@ -114,6 +114,7 @@ type DateInfo struct {
 	Quarter int
 }
 
+// dt: 20220725
 func NewDateInfo(dt int) DateInfo {
 	o := DateInfo{}
 	o.Dt = dt
