@@ -39,11 +39,6 @@ type CrawlingPrice interface {
 var startDate map[string]string
 var endDate string
 
-type Run struct {
-	code []model.Code
-	_    Insert
-}
-
 type RunCode struct {
 	code     model.Code
 	download CrawlingPrice
@@ -54,14 +49,12 @@ type RunCode struct {
 2. 종목코드로 가격데이터 다운로드
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
-func (o *Run) Run() {
+func Run() {
 	startDate, endDate = startEnd()
 
-	run_country(model.US)
-
-	// for _, v := range model.Countrys {
-	// 	run_country(v)
-	// }
+	for _, v := range model.Countrys {
+		run_country(v)
+	}
 
 	defer client.Disconnect(ctx)
 
@@ -72,7 +65,7 @@ func run_country(country model.Country) {
 	code := doc.GetCodes(client, country)
 	code = append(code, doc.GetCodesMarket(client, country)...)
 
-	for _, v := range code[:10] {
+	for _, v := range code {
 		run_code := RunCode{code: v}
 
 		switch country {
@@ -105,7 +98,7 @@ func run_country(country model.Country) {
 		} else {
 
 			log.Println(" price data size 0", v)
-			fmt.Printf("%+v\n", run_code)
+			fmt.Printf(" price data is 0 ,%+v \n", run_code)
 		}
 
 	}

@@ -31,7 +31,8 @@ func (o *Insert) Run() {
 		log.Fatal(err)
 	}
 	fmt.Printf(
-		"inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+		"%+v: inserted %v documents and upserted %v documents and ModifiedCount %v and deleted %v documents\n",
+		o.code,
 		res.InsertedCount,
 		res.UpsertedCount,
 		res.ModifiedCount,

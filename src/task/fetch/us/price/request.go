@@ -1,10 +1,7 @@
 package price
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -33,23 +30,20 @@ type RequestNasdaqCom struct {
 }
 type RespNasdaqCom struct {
 	Data struct {
-		Chart []ChartItem
+		Chart []struct {
+			X float64 `json:"x"`
+			Y float64 `json:"y"`
+			Z struct {
+				High     string `json:"high"`
+				Low      string `json:"low"`
+				Open     string `json:"open"`
+				Close    string `json:"close"`
+				Volume   string `json:"volume"`
+				DateTime string `json:"dateTime"`
+				Value    string `json:"value"`
+			}
+		}
 	}
-}
-
-type ChartItem struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
-	Z Z       `json:"z"`
-}
-type Z struct {
-	High     string `json:"high"`
-	Low      string `json:"low"`
-	Open     string `json:"open"`
-	Close    string `json:"close"`
-	Volume   string `json:"volume"`
-	DateTime string `json:"dateTime"`
-	Value    string `json:"value"`
 }
 
 func (o *RequestNasdaqCom) GetResult(downlad bool) ([]model.PriceMarket, error) {
@@ -73,48 +67,21 @@ func (o *RequestNasdaqCom) GetResult(downlad bool) ([]model.PriceMarket, error) 
 }
 func (o *RequestNasdaqCom) convert(f *os.File) []model.PriceMarket {
 
-	var v4 map[string]interface{}
 	var v5 RespNasdaqCom
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
+	us_request.ConvertNasdaqCom(f, &v5)
 
-	json.Unmarshal(data, &v4)
-	json.Unmarshal(data, &v5)
-
-	// v4_chart := v4["data"].(map[string]interface{})["chart"]
-	// //v4_chart_arr := v4_chart.([]ChartItem)
-	// //v4_chart_arr := v4_chart.([]map[string]ChartItem)
-
-	// v4_chart_arr := v4_chart.([]interface{})
-	// //cnt := len(v4_chart_arr)
-
-	// log.Println(reflect.TypeOf(v4_chart_arr))
-	// for _, v := range v4_chart_arr {
-	// 	log.Println(reflect.TypeOf(v))
-
-	// 	v_i := v.(map[string]interface{})
-	// 	log.Println(v_i, reflect.TypeOf(v_i))
-	// 	fmt.Sprintf("%#v \n", v_i)
-	// 	v_i_chart_item := v.(ChartItem)
-	// 	fmt.Sprintf("v_i_chart_item===%#v \n", v_i_chart_item)
-	// }
-
-	log.Println(v5)
 	var list []model.PriceMarket
-	// for _, v := range arr {
-
-	// 	// list = append(list, model.PriceMarket{
-	// 	// 	Code:     o.Code.Code,
-	// 	// 	DateInfo: model.NewDateInfo(cvt_dt(v.DateTime)),
-	// 	// 	OP:       cvt_price(v.Z.Open),
-	// 	// 	CP:       cvt_price(v.Z.Close),
-	// 	// 	LP:       cvt_price(v.Z.Low),
-	// 	// 	HP:       cvt_price(v.Z.High),
-	// 	// 	Vol:      cvt_vol(v.Z.Volume),
-	// 	// })
-	// }
+	for _, v := range v5.Data.Chart {
+		list = append(list, model.PriceMarket{
+			Code:     o.Code.Code,
+			DateInfo: model.NewDateInfo(cvt_dt(v.Z.DateTime)),
+			OP:       cvt_price(v.Z.Open),
+			CP:       cvt_price(v.Z.Close),
+			LP:       cvt_price(v.Z.Low),
+			HP:       cvt_price(v.Z.High),
+			Vol:      cvt_vol(v.Z.Volume),
+		})
+	}
 	return list
 }
 func (o *RequestNasdaqCom) getUrl() string {
@@ -135,8 +102,8 @@ func (o *RequestNasdaqCom) getFile() *os.File {
 // "07/25/2012" to int 20120725
 func cvt_dt(dt string) int {
 	ys := dt[6:10]
-	ms := dt[3:5]
-	ds := dt[:2]
+	ms := dt[:2]
+	ds := dt[3:5]
 	s := ys + ms + ds
 
 	res, err := strconv.Atoi(s)
