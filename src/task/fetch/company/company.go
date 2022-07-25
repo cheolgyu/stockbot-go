@@ -6,6 +6,7 @@ import (
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/dao"
+	kr_company "github.com/cheolgyu/stockbot/src/fetch/kr/company"
 	us_company "github.com/cheolgyu/stockbot/src/fetch/us/company"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,10 +29,9 @@ func Run() {
 		var crawling Crawling
 		switch country {
 		case model.KR:
-			//crawling = &kr_company.Req_krx{Download: true}
-			crawling = &us_company.NasdaqCom{}
+			crawling = &kr_company.Req_krx{Download: false}
 		case model.US:
-			crawling = &us_company.NasdaqCom{}
+			crawling = &us_company.NasdaqCom{Download: false}
 		}
 
 		crawling.Request()
@@ -51,7 +51,7 @@ func merge(country model.Country, current map[string]model.Company, incoming []m
 		if exist {
 			list = append(list, merge_accept_incoming(current_item, v))
 		} else {
-			list = append(list, merge_accept_new_incoming(country, current_item))
+			list = append(list, merge_accept_new_incoming(country, v))
 		}
 	}
 

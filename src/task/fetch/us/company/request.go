@@ -1,8 +1,9 @@
 package company
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -13,6 +14,12 @@ import (
 var Addr string = "https://api.nasdaq.com/api/screener/stocks?&download=true&exchange="
 
 type NasdaqCom struct {
+	Download bool
+}
+
+type NasdaqComItem struct {
+	Symbol string
+	Name   string
 }
 
 const FILE_DIR_US = file.FILE_DIR + "/us" + "/company/"
@@ -21,24 +28,23 @@ func (o *NasdaqCom) Request() {
 
 	file.Mkdir([]string{FILE_DIR_US})
 
-	fmt.Sprintf("%#v", model.Exchanges[model.US])
-	log.Println(model.Exchanges[model.US])
-
-	for k, _ := range model.Exchanges[model.US] {
-		fmt.Sprintf("%#v", k)
-		switch k {
-		case model.NASDAQ:
-			request(Addr+"NASDAQ", model.NASDAQ)
-		case model.NYSE:
-			request(Addr+"NYSE", model.NYSE)
-		case model.AMEX:
-			request(Addr+"AMEX", model.AMEX)
+	if o.Download {
+		for k, _ := range model.Exchanges[model.US] {
+			switch k {
+			case model.NASDAQ:
+				request(Addr+"NASDAQ", model.NASDAQ)
+			case model.NYSE:
+				request(Addr+"NYSE", model.NYSE)
+			case model.AMEX:
+				request(Addr+"AMEX", model.AMEX)
+			}
 		}
 	}
+
 }
 
 func request(url string, exchange model.Exchange) {
-	fnm := FILE_DIR_US + model.Exchanges[model.US][exchange].Code
+	fnm := get_fnm(exchange)
 	file := file.CreateFile(fnm)
 	defer file.Close()
 
@@ -68,11 +74,42 @@ func request(url string, exchange model.Exchange) {
 }
 
 func (o *NasdaqCom) GetCompany() []model.Company {
-	log.Println("us Save()")
+	log.Println("us GetCompany")
 	var list []model.Company
 
-	//파싱하자
-	// function  o.나스닥 interface{} 에서 []company 로
+	for k, _ := range model.Exchanges[model.US] {
+		list = append(list, convert(k)...)
+	}
 
 	return list
+}
+
+func get_fnm(exchange model.Exchange) string {
+	return FILE_DIR_US + model.Exchanges[model.US][exchange].Code
+}
+
+func convert(exchange model.Exchange) []model.Company {
+	ff := file.File{}
+
+	f := ff.Open(get_fnm(exchange))
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+	var v map[string]map[string][]NasdaqComItem
+	json.Unmarshal(data, &v)
+	arr := v["data"]["rows"]
+
+	var cmp []model.Company
+	for _, v := range arr {
+		cmp = append(cmp, model.Company{
+			Code: model.Code{
+				Code: v.Symbol,
+				Name: v.Name,
+			},
+			Country: model.US,
+			Market:  model.Exchanges[model.US][exchange].Code,
+		})
+	}
+	return cmp
 }

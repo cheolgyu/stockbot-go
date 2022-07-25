@@ -37,7 +37,8 @@ func Insert(client *mongo.Client, list []model.Company) {
 		log.Fatal(err)
 	}
 	fmt.Printf(
-		"ModifiedCount %v and deleted %v documents\n",
+		"Company InsertedCount %v and ModifiedCount %v and deleted %v documents\n",
+		res.InsertedCount,
 		res.ModifiedCount,
 		res.DeletedCount)
 
