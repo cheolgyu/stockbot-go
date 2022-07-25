@@ -9,6 +9,7 @@ import (
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	kr_price "github.com/cheolgyu/stockbot/src/fetch/country/kr/price"
 	us_price "github.com/cheolgyu/stockbot/src/fetch/country/us/price"
@@ -25,10 +26,12 @@ var collectionPrice *mongo.Collection
 const PRICE_DATE_FORMAT = "20060102"
 
 func init() {
+	mlog.Info(mlog.Fetch, "start price/price.go init")
 	client, ctx = common.Connect()
 	create_index_price(client)
 	create_index_opening(client)
 	collectionPrice = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+	mlog.Info(mlog.Fetch, "end price/price.go init")
 }
 
 type CrawlingPrice interface {
@@ -86,6 +89,7 @@ func run_country(country model.Country) {
 
 		list, err := run_code.download.GetResult(Download)
 		if err != nil {
+			mlog.Err(mlog.Fetch, err)
 			log.Panic(err)
 		}
 
@@ -98,7 +102,7 @@ func run_country(country model.Country) {
 			insert.Run()
 
 		} else {
-
+			mlog.Info(mlog.Fetch, " price data is 0 ,%+v \n", run_code)
 			log.Println(" price data size 0", v)
 			fmt.Printf(" price data is 0 ,%+v \n", run_code)
 		}
@@ -107,6 +111,7 @@ func run_country(country model.Country) {
 
 	_, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, endDate)
 	if err != nil {
+		mlog.Err(mlog.Fetch, err)
 		panic(err.Error())
 	}
 }
@@ -127,6 +132,7 @@ func startEnd() (map[string]string, string) {
 
 	cursor, err := collectionPrice.Aggregate(ctx, mongo.Pipeline{groupState, projectStage})
 	if err != nil {
+		mlog.Err(mlog.Fetch, err)
 		log.Fatal(err)
 	}
 	result := []struct {
@@ -135,6 +141,7 @@ func startEnd() (map[string]string, string) {
 	}{}
 	err = cursor.All(context.TODO(), &result)
 	if err != nil {
+		mlog.Err(mlog.Fetch, err)
 		log.Fatal(err)
 	}
 

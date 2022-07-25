@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
+	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"github.com/cheolgyu/stockbot/src/fetch/company"
 	"github.com/cheolgyu/stockbot/src/fetch/price"
@@ -16,13 +16,20 @@ const DOWNLOAD_COMPANY bool = true
 const DOWNLOAD_PRICE bool = true
 
 func init() {
+	mlog.Info(mlog.Fetch, "start main.go init")
 	insert_Exchanges()
+	mlog.Info(mlog.Fetch, "end main.go init")
 }
 
 func main() {
-	log.Println("i am fetch")
+	mlog.Info(mlog.Fetch, "start main")
+	mlog.Info(mlog.Fetch, "start company, DOWNLOAD_COMPANY=", DOWNLOAD_COMPANY)
 	company.Run(DOWNLOAD_COMPANY)
+	mlog.Info(mlog.Fetch, "end company")
+	mlog.Info(mlog.Fetch, "start price, DOWNLOAD_PRICE=", DOWNLOAD_PRICE)
 	price.Run(DOWNLOAD_PRICE)
+	mlog.Info(mlog.Fetch, "end price")
+	mlog.Info(mlog.Fetch, "end main")
 }
 
 func insert_Exchanges() {

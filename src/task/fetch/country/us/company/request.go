@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/fetch/country/us/us_request"
 	"github.com/cheolgyu/stockbot/src/fetch/file"
-	"github.com/cheolgyu/stockbot/src/fetch/us/us_request"
 )
 
 var Addr string = "https://api.nasdaq.com/api/screener/stocks?&download=true&exchange="

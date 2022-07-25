@@ -25,6 +25,10 @@ const FILE_NAME_COMPANY_STATE = "company_state.xlsx"
 const FILE_COMPANY_DETAIL = FILE_DIR_COMPANY_DETAIL + FILE_NAME_COMPANY_DETAIL
 const FILE_COMPANY_STATE = FILE_DIR_COMPANY_STATE + FILE_NAME_COMPANY_STATE
 
+func init() {
+	file.Mkdir([]string{FILE_DIR_COMPANY_DETAIL, FILE_DIR_COMPANY_STATE})
+}
+
 type Req_krx struct {
 	Download bool
 	Req_krx_type
@@ -44,8 +48,7 @@ const (
 )
 
 func (o *Req_krx) Request() {
-	req_krx := Req_krx{}
-	req_krx.Run()
+	o.Run()
 }
 
 func (o *Req_krx) GetCompany() []model.Company {
@@ -62,7 +65,6 @@ func (o *Req_krx) GetCompany() []model.Company {
 }
 
 func (o *Req_krx) init() {
-	file.Mkdir([]string{FILE_DIR_COMPANY_DETAIL, FILE_DIR_COMPANY_STATE})
 
 	if o.Req_krx_type == COMPANY_DETAIL {
 		o.saveNm = FILE_COMPANY_DETAIL

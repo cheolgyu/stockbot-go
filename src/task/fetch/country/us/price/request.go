@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
+	"github.com/cheolgyu/stockbot/src/fetch/country/us/us_request"
 	"github.com/cheolgyu/stockbot/src/fetch/file"
-	"github.com/cheolgyu/stockbot/src/fetch/us/us_request"
 )
 
 //https://api.nasdaq.com/api/quote/AACG/chart?assetclass=stocks&fromdate=1888-07-25&todate=2022-07-25
@@ -57,10 +57,10 @@ func (o *RequestNasdaqCom) GetResult(downlad bool) ([]model.PriceMarket, error) 
 	if downlad {
 		file = o.getSaveFile()
 		us_request.HttpNasdaqCom(url, file)
-	} else {
-		file = o.getFile()
+		file.Close()
 	}
 
+	file = o.getFile()
 	res = o.convert(file)
 
 	return res, nil
