@@ -31,23 +31,25 @@ type RequestNasdaqCom struct {
 	model.Code
 	StartDate string
 }
+type RespNasdaqCom struct {
+	Data struct {
+		Chart []ChartItem
+	}
+}
+
 type ChartItem struct {
-	// X는 무시
-	//X int
-	// 무시
-	//Y float32
-	Z
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	Z Z       `json:"z"`
 }
 type Z struct {
-	High string
-	Low  string
-	Open string
-	// 실제 Y
-	Close  string
-	Volume string
-	// 실제 X
-	DateTime string
-	Value    string
+	High     string `json:"high"`
+	Low      string `json:"low"`
+	Open     string `json:"open"`
+	Close    string `json:"close"`
+	Volume   string `json:"volume"`
+	DateTime string `json:"dateTime"`
+	Value    string `json:"value"`
 }
 
 func (o *RequestNasdaqCom) GetResult(downlad bool) ([]model.PriceMarket, error) {
@@ -71,27 +73,35 @@ func (o *RequestNasdaqCom) GetResult(downlad bool) ([]model.PriceMarket, error) 
 }
 func (o *RequestNasdaqCom) convert(f *os.File) []model.PriceMarket {
 
-	v := make(map[string]map[string][]ChartItem)
-
+	var v4 map[string]interface{}
+	var v5 RespNasdaqCom
 	data, err := ioutil.ReadAll(f)
-	fi, err := f.Stat()
-	log.Println("ioutil.ReadAll(f) len :", f.Name(), fi)
-	log.Println("ioutil.ReadAll(f) len :", len(data))
 	if err != nil {
 		panic(err)
 	}
-	json.Unmarshal(data, &v)
-	// err = json.Unmarshal(data, &v)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	panic(err)
+
+	json.Unmarshal(data, &v4)
+	json.Unmarshal(data, &v5)
+
+	// v4_chart := v4["data"].(map[string]interface{})["chart"]
+	// //v4_chart_arr := v4_chart.([]ChartItem)
+	// //v4_chart_arr := v4_chart.([]map[string]ChartItem)
+
+	// v4_chart_arr := v4_chart.([]interface{})
+	// //cnt := len(v4_chart_arr)
+
+	// log.Println(reflect.TypeOf(v4_chart_arr))
+	// for _, v := range v4_chart_arr {
+	// 	log.Println(reflect.TypeOf(v))
+
+	// 	v_i := v.(map[string]interface{})
+	// 	log.Println(v_i, reflect.TypeOf(v_i))
+	// 	fmt.Sprintf("%#v \n", v_i)
+	// 	v_i_chart_item := v.(ChartItem)
+	// 	fmt.Sprintf("v_i_chart_item===%#v \n", v_i_chart_item)
 	// }
 
-	//us_request.ConvertNasdaqCom(f, &v)
-	log.Println(v["data"]["chart"])
-
-	//arr := v["data"]["chart"]
-
+	log.Println(v5)
 	var list []model.PriceMarket
 	// for _, v := range arr {
 
