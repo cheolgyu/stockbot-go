@@ -10,8 +10,8 @@ import (
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	kr_price "github.com/cheolgyu/stockbot/src/fetch/kr/price"
-	us_price "github.com/cheolgyu/stockbot/src/fetch/us/price"
+	kr_price "github.com/cheolgyu/stockbot/src/fetch/country/kr/price"
+	us_price "github.com/cheolgyu/stockbot/src/fetch/country/us/price"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
