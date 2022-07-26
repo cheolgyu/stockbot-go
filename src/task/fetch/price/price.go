@@ -123,7 +123,7 @@ func run_country(country model.Country) {
 
 	}
 
-	doc.UpdateNoteOne(doc.GetNoteField(country, doc.PRICE_UPDATE))
+	doc.UpdateNoteOne(doc.GetNoteField(country, doc.FETCH_PRICE_UPDATE))
 }
 
 //return (key:code value:20220725, 20220725 )

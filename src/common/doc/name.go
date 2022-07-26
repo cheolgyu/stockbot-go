@@ -13,8 +13,11 @@ const DB_PUB_COLL_NOTE = "note"
 
 type NOTE_FIELD string
 
-const PRICE_UPDATE NOTE_FIELD = "price_updated_date"
-const COMPANY_UPDATE NOTE_FIELD = "company_updated_date"
+const FETCH_PRICE_UPDATE NOTE_FIELD = "fetch_price_updated"
+const FETCH_COMPANY_UPDATE NOTE_FIELD = "fetch_company_updated"
+const LINE_BOUND_UPDATE NOTE_FIELD = "line_bound_updated"
+const LINE_YMXB_UPDATE NOTE_FIELD = "line_ymxb_updated"
+const AGG_VOL_UPDATE NOTE_FIELD = "agg_vol_updated"
 
 func GetNoteField(country model.Country, field NOTE_FIELD) string {
 	return fmt.Sprintf("%v_%v", country, field)

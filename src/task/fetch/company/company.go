@@ -38,7 +38,7 @@ func Run(country model.Country, download bool) {
 	merge_list := merge(country, current, incoming)
 
 	Insert(client, merge_list)
-	doc.UpdateNoteOne(doc.GetNoteField(country, doc.PRICE_UPDATE))
+	doc.UpdateNoteOne(doc.GetNoteField(country, doc.FETCH_PRICE_UPDATE))
 }
 
 func merge(country model.Country, current map[string]model.Company, incoming []model.Company) []model.Company {
