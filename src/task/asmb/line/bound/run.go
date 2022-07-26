@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/common/run"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -22,11 +22,11 @@ func init() {
 
 type BoundRun struct {
 	code []model.Code
-	run.Run
+	base.Run
 }
 
 func (o *BoundRun) BoundRun() {
-	o.RunStart()
+	o.Start()
 
 	defer client.Disconnect(context.TODO())
 
@@ -49,5 +49,5 @@ func (o *BoundRun) BoundRun() {
 		}
 	}
 
-	o.RunEnd()
+	o.End()
 }
