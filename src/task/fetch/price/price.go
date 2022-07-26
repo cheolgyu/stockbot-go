@@ -74,10 +74,10 @@ func Run(download bool) {
 	Download = download
 	startDate, endDate = startEnd()
 
-	// for _, v := range model.Countrys {
-	// 	run_country(v)
-	// }
-	run_country(model.US)
+	for _, v := range model.Countrys {
+		run_country(v)
+	}
+	//run_country(model.US)
 	defer client.Disconnect(ctx)
 
 }

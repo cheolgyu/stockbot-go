@@ -21,16 +21,28 @@
          + DB_PUB_COLL_COMPANY
 
 
+   ### stockbot/src/task/fetch/
+      + process
+        ---
+            1. 거래소 저장
+            2. company 실행
+            3. price 실행 
+        ---
+
    ### stockbot/src/task/fetch/kr/company   
       + process
          ---
-         0. init.go : 마켓정보 저장
-         1. DB 조회: 기존회사
-         2. 엑셀다운: 기존회사의 갱신정보, 새회사
-         3. 기존회사와 새회사 합치기
-            1. 회사code일치시 새회사정보로 변경( object id 유지 ) 
-            2. 회사code 불일치시 new회사로 objectid 부여 
-         4. 저장: replace 와 upsert로 처리
+         loop 나라
+           1. DB 조회: 기존회사(나라)
+           2. 크롤링시작 
+              1. kr: krx.data   엑셀파일
+              2. us: nasdaq.com json
+           3. 파일로 저장
+           4. 파일을 []stuct로 변환
+           5. 기존회사와 새회사 합치기
+              1. 회사code일치시 새회사정보로 변경( object id 유지 ) 
+              2. 회사code 불일치시 new회사로 objectid 부여 
+           6. 저장: replace 와 upsert로 처리
          ---
       + 테이블
       + DB_PUB
@@ -39,22 +51,25 @@
    ### stockbot/src/task/fetch/kr/price   
       + process
          ---
-         1. 네이버차트 가격데이터 조회시 필요한것 조회기간+code
-         2. 조회기간
-            1. 시작기준
-               1. 코드별 price 컬렉션의 max dt값
-            2. 종료기준은 오늘일자
-         3. 코드조회
-         4. 저장
-            1. replace로 처리
-         5. 장열림 저장
-         ---
-      + 테이블
-      + DB_DATA
-         + DB_DATA_COLL_PRICE
-         + DB_PUB
-         + DB_PUB_COLL_NOTE
-            + DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 가격정보 업데이트 일자
+         1. init()
+            price_index 체크
+         2. 종목별 조회시작 종료 기간 만들기 
+            1. 시작: 코드별 price 컬렉션의 max dt값
+            2. 종료: 오늘
+         3. loop 나라
+            1. 나라의 종목코드,마켓코드 조회
+            2. loop 코드
+               1. 나라의 종목코드의 기간의 가격목록 파일저장
+               2. 파일의 []stuct로 변환
+               3. 저장
+           ---
+        + 테이블
+          + open,close,high,low의 data type는 decimal
+        + DB_DATA
+           + DB_DATA_COLL_PRICE
+        + DB_PUB
+           + DB_PUB_COLL_NOTE
+              + DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 가격정보 업데이트 일자
 
 
    ### stockbot/src/task/asmb/line/bound 
@@ -69,14 +84,6 @@
          5. 바운스점 저장 
       
          ---
-         ---
-         1. 코드목록조회
-         2. 코드별 종시저고가별 마지막 바운드점의 일자조회
-         3. 마지막 바운드점의 일자 이후의 가격목록 조회
-         4. 마지막 바운드점의 일자 이후부터 가격목록으로 바운스점 찾기
-         5. 바운스점 저장 
-      
-         ---      
       + 테이블
       + DB_PUB
          + DB_PUB_COLL_COMPANY
