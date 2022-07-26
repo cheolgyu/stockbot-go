@@ -23,32 +23,31 @@
 
    ### stockbot/src/task/fetch/
       + process
-        ---
+         ---
             1. 거래소 저장
-            2. company 실행
-            3. price 실행 
-        ---
+            2. company 실행(나라)
+            3. price 실행(나라) 
+         ---
 
-   ### stockbot/src/task/fetch/kr/company   
+   ### stockbot/src/task/fetch/company   
       + process
          ---
-         loop 나라
-           1. DB 조회: 기존회사(나라)
-           2. 크롤링시작 
-              1. kr: krx.data   엑셀파일
-              2. us: nasdaq.com json
-           3. 파일로 저장
-           4. 파일을 []stuct로 변환
-           5. 기존회사와 새회사 합치기
-              1. 회사code일치시 새회사정보로 변경( object id 유지 ) 
-              2. 회사code 불일치시 new회사로 objectid 부여 
-           6. 저장: replace 와 upsert로 처리
+         input(나라)
+            1. DB 조회: 기존회사(나라)
+            2. 크롤링시작 
+               1. kr: krx.data   엑셀파일
+               2. us: nasdaq.com json
+            3. 파일로 저장
+            4. 파일을 []stuct로 변환
+            5. 기존회사와 새회사 합치기
+            6. 저장: replace 와 upsert로 처리
          ---
       + 테이블
       + DB_PUB
          + DB_PUB_COLL_COMPANY
+         + DB_PUB_COLL_NOTE
 
-   ### stockbot/src/task/fetch/kr/price   
+   ### stockbot/src/task/fetch/price   
       + process
          ---
          1. init()
@@ -56,7 +55,7 @@
          2. 종목별 조회시작 종료 기간 만들기 
             1. 시작: 코드별 price 컬렉션의 max dt값
             2. 종료: 오늘
-         3. loop 나라
+         3. input(나라)
             1. 나라의 종목코드,마켓코드 조회
             2. loop 코드
                1. 나라의 종목코드의 기간의 가격목록 파일저장
@@ -69,7 +68,7 @@
            + DB_DATA_COLL_PRICE
         + DB_PUB
            + DB_PUB_COLL_NOTE
-              + DB_PUB_COLL_NOTE_PRICE_UPDATED_KR: 가격정보 업데이트 일자
+            
 
 
    ### stockbot/src/task/asmb/line/bound 
@@ -87,7 +86,7 @@
       + 테이블
       + DB_PUB
          + DB_PUB_COLL_COMPANY
-         + DB_DATA
+       + DB_DATA
          + DB_DATA_COLL_BOUND_POINT
 
 

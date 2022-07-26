@@ -1,10 +1,24 @@
 package doc
 
+import (
+	"fmt"
+
+	"github.com/cheolgyu/stockbot/src/common/model"
+)
+
 const DB_PUB = "test"
 const DB_PUB_COLL_COMPANY = "company"
 const DB_PUB_COLL_MARKET = "market"
 const DB_PUB_COLL_NOTE = "note"
-const DB_PUB_COLL_NOTE_PRICE_UPDATED_KR = "kr_price_updated_date"
+
+type NOTE_FIELD string
+
+const PRICE_UPDATE NOTE_FIELD = "price_updated_date"
+const COMPANY_UPDATE NOTE_FIELD = "company_updated_date"
+
+func GetNoteField(country model.Country, field NOTE_FIELD) string {
+	return fmt.Sprintf("%v_%v", country, field)
+}
 
 const DB_DATA = "data"
 const DB_DATA_COLL_PRICE = "price"

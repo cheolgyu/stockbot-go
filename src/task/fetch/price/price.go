@@ -69,15 +69,13 @@ type RunCode struct {
 2. 종목코드로 가격데이터 다운로드
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
-func Run(download bool) {
+func Run(country model.Country, download bool) {
 	//	delete_us_prices(client)
 	Download = download
 	startDate, endDate = startEnd()
 
-	for _, v := range model.Countrys {
-		run_country(v)
-	}
-	//run_country(model.US)
+	run_country(country)
+
 	defer client.Disconnect(ctx)
 
 }
@@ -125,11 +123,7 @@ func run_country(country model.Country) {
 
 	}
 
-	_, err := doc.UpdateNoteOne(doc.DB_PUB_COLL_NOTE_PRICE_UPDATED_KR, endDate)
-	if err != nil {
-		mlog.Err(mlog.Fetch, err)
-		panic(err.Error())
-	}
+	doc.UpdateNoteOne(doc.GetNoteField(country, doc.PRICE_UPDATE))
 }
 
 //return (key:code value:20220725, 20220725 )

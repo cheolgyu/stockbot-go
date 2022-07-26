@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	kr_company "github.com/cheolgyu/stockbot/src/fetch/country/kr/company"
 	us_company "github.com/cheolgyu/stockbot/src/fetch/country/us/company"
@@ -17,28 +18,27 @@ type Crawling interface {
 
 var client *mongo.Client
 
-func Run(download bool) {
+func Run(country model.Country, download bool) {
 
 	client, _ = common.Connect()
 	defer client.Disconnect(context.TODO())
 
-	for _, country := range model.Countrys {
-		current := SelectMapCompany(client, country)
+	current := SelectMapCompany(client, country)
 
-		var crawling Crawling
-		switch country {
-		case model.KR:
-			crawling = &kr_company.Req_krx{Download: download}
-		case model.US:
-			crawling = &us_company.NasdaqCom{Download: download}
-		}
-
-		crawling.Request()
-		incoming := crawling.GetCompany()
-		merge_list := merge(country, current, incoming)
-
-		Insert(client, merge_list)
+	var crawling Crawling
+	switch country {
+	case model.KR:
+		crawling = &kr_company.Req_krx{Download: download}
+	case model.US:
+		crawling = &us_company.NasdaqCom{Download: download}
 	}
+
+	crawling.Request()
+	incoming := crawling.GetCompany()
+	merge_list := merge(country, current, incoming)
+
+	Insert(client, merge_list)
+	doc.UpdateNoteOne(doc.GetNoteField(country, doc.PRICE_UPDATE))
 }
 
 func merge(country model.Country, current map[string]model.Company, incoming []model.Company) []model.Company {
