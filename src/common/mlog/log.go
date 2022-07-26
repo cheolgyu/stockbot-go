@@ -26,6 +26,16 @@ type LOG struct {
 	Where   string
 }
 
+func (o *LOG) Info(v ...any) {
+	l := LOG{
+		Who:     string(o.Who),
+		What:    LOG_WHAT_INFO,
+		When:    time.Now(),
+		Content: fmt.Sprint(v...)}
+
+	send(l)
+}
+
 const LOG_WHAT_INFO = "info"
 const LOG_WHAT_ERROR = "error"
 const LOG_HOW_WHAT_START = "start"
