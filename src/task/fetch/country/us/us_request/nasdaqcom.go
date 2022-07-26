@@ -10,6 +10,7 @@ import (
 )
 
 func HttpNasdaqCom(url string, f *os.File) {
+	log.Println("HttpNasdaqCom:", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		panic(err)
@@ -31,7 +32,7 @@ func HttpNasdaqCom(url string, f *os.File) {
 	if err != nil {
 		panic(err)
 	}
-	log.Println("filenm=", f.Name(), ",size=", size)
+	log.Println("HttpNasdaqCom: filenm=", f.Name(), ",size=", size)
 }
 
 func ConvertNasdaqCom(f *os.File, convertStuct any) {

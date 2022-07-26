@@ -73,7 +73,7 @@ loop:
 		case r := <-resp_ch:
 			log.Println(r.StatusCode)
 			if r.StatusCode == 200 {
-				log.Println("log요청.상태코드 정상")
+				//log.Println("log요청.상태코드 정상")
 			} else {
 				log.Println("log요청.상태코드 !정상=", r.StatusCode)
 			}

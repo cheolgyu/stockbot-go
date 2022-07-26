@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Market struct {
@@ -70,6 +72,11 @@ func ConvertExchanges(country Country, code string) (Exchange, error) {
 	return key, errors.New("알수없는 마켓문자열입니다. " + upcode)
 }
 
+type Price struct {
+	Display string
+	Decimal uint
+}
+
 /*
 	OP    시가
 	HP    고가
@@ -80,13 +87,34 @@ func ConvertExchanges(country Country, code string) (Exchange, error) {
 type PriceMarket struct {
 	Code     string
 	DateInfo `bson:"inline"`
-	OP       float32
-	CP       float32
-	LP       float32
-	HP       float32
+	OP       primitive.Decimal128
+	CP       primitive.Decimal128
+	LP       primitive.Decimal128
+	HP       primitive.Decimal128
 	Vol      int
 	//ForeignerBurnoutRate
 	FBR string
+}
+
+// "3.87" to 3.87
+func ParsePrice(myString string) primitive.Decimal128 {
+	p, err := primitive.ParseDecimal128(myString)
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+func ParseVol(myString string) int {
+
+	s := strings.Replace(myString, ",", "", -1)
+	value, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return value
+
 }
 
 type Country string

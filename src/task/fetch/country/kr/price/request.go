@@ -177,35 +177,11 @@ func stringToPrice(code string, str string) model.PriceMarket {
 		panic(err)
 	}
 
-	if res, err := strconv.ParseFloat(arr[1], 32); err == nil {
-		p.OP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[2], 32); err == nil {
-		p.HP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[3], 32); err == nil {
-		p.LP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[4], 32); err == nil {
-		p.CP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := parseUint(arr[5]); err == nil {
-		p.Vol = res
-	} else if err != nil {
-		panic(err)
-	}
+	p.OP = model.ParsePrice(arr[1])
+	p.HP = model.ParsePrice(arr[2])
+	p.LP = model.ParsePrice(arr[3])
+	p.CP = model.ParsePrice(arr[4])
+	p.Vol = model.ParseVol(arr[5])
 
 	str_fr := strings.Replace(arr[6], ",", "", -1)
 	if str_fr == "" {

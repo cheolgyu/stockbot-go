@@ -25,7 +25,23 @@ var collectionPrice *mongo.Collection
 //custom := now.Format("2006-01-02 15:04:05")
 const PRICE_DATE_FORMAT = "20060102"
 
+func delete_us_prices(client *mongo.Client) {
+	log.Println("delete_us_prices() start")
+	coll := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+
+	code := doc.GetCodes(client, model.US)
+	for _, v := range code {
+		_, err := coll.DeleteMany(context.TODO(), bson.M{"code": v.Code})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	log.Println("delete_us_prices() end")
+}
+
 func init() {
+
 	mlog.Info(mlog.Fetch, "start price/price.go init")
 	client, ctx = common.Connect()
 	create_index_price(client)
@@ -54,13 +70,14 @@ type RunCode struct {
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
 func Run(download bool) {
+	//	delete_us_prices(client)
 	Download = download
 	startDate, endDate = startEnd()
 
-	for _, v := range model.Countrys {
-		run_country(v)
-	}
-
+	// for _, v := range model.Countrys {
+	// 	run_country(v)
+	// }
+	run_country(model.US)
 	defer client.Disconnect(ctx)
 
 }
@@ -100,7 +117,6 @@ func run_country(country model.Country) {
 				list: list,
 			}
 			insert.Run()
-
 		} else {
 			mlog.Info(mlog.Fetch, " price data is 0 ,%+v \n", run_code)
 			log.Println(" price data size 0", v)

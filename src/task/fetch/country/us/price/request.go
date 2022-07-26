@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
@@ -72,14 +71,15 @@ func (o *RequestNasdaqCom) convert(f *os.File) []model.PriceMarket {
 
 	var list []model.PriceMarket
 	for _, v := range v5.Data.Chart {
+
 		list = append(list, model.PriceMarket{
 			Code:     o.Code.Code,
 			DateInfo: model.NewDateInfo(cvt_dt(v.Z.DateTime)),
-			OP:       cvt_price(v.Z.Open),
-			CP:       cvt_price(v.Z.Close),
-			LP:       cvt_price(v.Z.Low),
-			HP:       cvt_price(v.Z.High),
-			Vol:      cvt_vol(v.Z.Volume),
+			OP:       model.ParsePrice(v.Z.Open),
+			CP:       model.ParsePrice(v.Z.Close),
+			LP:       model.ParsePrice(v.Z.Low),
+			HP:       model.ParsePrice(v.Z.High),
+			Vol:      model.ParseVol(v.Z.Volume),
 		})
 	}
 	return list
@@ -111,25 +111,4 @@ func cvt_dt(dt string) int {
 		panic(err)
 	}
 	return res
-}
-
-// "3.87" to 3.87
-func cvt_price(myString string) float32 {
-	value, err := strconv.ParseFloat(myString, 32)
-	if err != nil {
-		panic(err)
-	}
-	float := float32(value)
-	return float
-}
-
-//  "2,519" to 2519
-func cvt_vol(myString string) int {
-
-	s := strings.Replace(myString, ",", "", -1)
-	value, err := strconv.Atoi(s)
-	if err != nil {
-		panic(err)
-	}
-	return value
 }
