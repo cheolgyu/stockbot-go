@@ -20,13 +20,12 @@ func init() {
 	price_collection = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 }
 
-type BoundRun struct {
+type LineBound struct {
 	code []model.Code
 	base.Run
 }
 
-func (o *BoundRun) BoundRun() {
-	o.Start()
+func (o *LineBound) EXE() {
 
 	defer client.Disconnect(context.TODO())
 
@@ -49,5 +48,4 @@ func (o *BoundRun) BoundRun() {
 		}
 	}
 
-	o.End()
 }

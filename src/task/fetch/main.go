@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
-	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common"
 	"github.com/cheolgyu/stockbot/src/common/doc"
@@ -24,22 +22,17 @@ func init() {
 }
 
 func main() {
-	countryPtr := flag.String("country", "kr", "input country value")
-	low_country := strings.ToLower(*countryPtr)
-	var country model.Country
-	for k, v := range model.Countrys {
-		if k == low_country {
-			country = v
-		}
-	}
-	mlog.Info(mlog.Fetch, "start main:", countryPtr)
-	mlog.Info(mlog.Fetch, "start company, DOWNLOAD_COMPANY=", DOWNLOAD_COMPANY, countryPtr)
-	company.Run(country, DOWNLOAD_COMPANY)
-	mlog.Info(mlog.Fetch, "end company", countryPtr)
-	mlog.Info(mlog.Fetch, "start price, DOWNLOAD_PRICE=", DOWNLOAD_PRICE, countryPtr)
-	price.Run(country, DOWNLOAD_PRICE)
-	mlog.Info(mlog.Fetch, "end price", countryPtr)
-	mlog.Info(mlog.Fetch, "end main", countryPtr)
+	company := company.FetchCompany{}
+	company.Download = DOWNLOAD_COMPANY
+	company.BaseRunStart(mlog.FetchCompany)
+	company.EXE()
+	company.BaseRunEnd()
+
+	price := price.FetchPrice{}
+	price.Download = DOWNLOAD_PRICE
+	price.BaseRunStart(mlog.FetchPrice)
+	price.EXE()
+	price.BaseRunEnd()
 }
 
 func insert_Exchanges() {

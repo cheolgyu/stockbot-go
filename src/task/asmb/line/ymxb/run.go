@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,8 +20,8 @@ var collection_price *mongo.Collection
 var collection_ymxb_quote_unit *mongo.Collection
 var collection_ymxb *mongo.Collection
 
-func init() {
-	client, _ = common.Connect()
+type LineYmxb struct {
+	base.Run
 }
 
 /*
@@ -57,7 +58,9 @@ type ymxb struct {
 	b float64
 }
 
-func Run() {
+func (o *LineYmxb) EXE() {
+
+	client, _ = common.Connect()
 	defer client.Disconnect(context.TODO())
 
 	collection_boud_point = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_BOUND_POINT)
@@ -65,11 +68,11 @@ func Run() {
 	collection_ymxb_quote_unit = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB_QUOTE_UNIT)
 	collection_ymxb = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_YMXB)
 
-	company := doc.GetCompany(client, model.ALL)
+	company := doc.GetCompany(client, o.Country)
 	var list []interface{}
 
 	for _, c := range company {
-		market_code, err := model.ConvertExchanges(model.KR, c.Market)
+		market_code, err := model.ConvertExchanges(o.Country, c.Market)
 		errHandler(err, "model.String2Market(c.Market),c.Market= ", c.Market)
 
 		for _, v := range model.PriceTypes_arr {
@@ -102,7 +105,7 @@ func Run() {
 	errHandler(err, "collection_ymxb.Drop")
 
 	mod := mongo.IndexModel{
-		Keys:    bson.D{{"code", 1}, {"price_type", 1}, {"ymxb_type", 1}}, // index in ascending order or -1 for descending order
+		Keys:    bson.D{{"code", 1}, {"price_type", 1}, {"ymxb_type", model.YmxbType1}}, // index in ascending order or -1 for descending order
 		Options: options.Index().SetUnique(true),
 	}
 	_, err = collection_ymxb.Indexes().CreateOne(context.TODO(), mod)

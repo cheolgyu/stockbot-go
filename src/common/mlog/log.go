@@ -17,7 +17,7 @@ func send(inp LOG) {
 }
 
 type LOG struct {
-	Who     string
+	Who     WHO
 	What    string
 	How     string
 	HowWhat string `bson:"how_what"  json:"how_what" `
@@ -28,7 +28,7 @@ type LOG struct {
 
 func (o *LOG) Info(v ...any) {
 	l := LOG{
-		Who:     string(o.Who),
+		Who:     o.Who,
 		What:    LOG_WHAT_INFO,
 		When:    time.Now(),
 		Content: fmt.Sprint(v...)}
@@ -44,11 +44,13 @@ const LOG_HOW_WHAT_END = "end"
 type WHO string
 
 const (
-	Fetch     WHO = "fetch"
-	AggVol    WHO = "agg_vol"
-	LineBound WHO = "line_bound"
-	LineYmxb  WHO = "line_ymxb"
-	Ticker    WHO = "ticker"
+	Fetch        WHO = "fetch"
+	FetchCompany WHO = "fetch_company"
+	FetchPrice   WHO = "fetch_price"
+	AggVol       WHO = "agg_vol"
+	LineBound    WHO = "line_bound"
+	LineYmxb     WHO = "line_ymxb"
+	Ticker       WHO = "ticker"
 )
 
 var WaitLog sync.WaitGroup
@@ -59,7 +61,7 @@ func init() {
 }
 func Info(who WHO, v ...any) {
 	l := LOG{
-		Who:     string(who),
+		Who:     who,
 		What:    LOG_WHAT_INFO,
 		When:    time.Now(),
 		Content: fmt.Sprint(v...)}
@@ -69,7 +71,7 @@ func Info(who WHO, v ...any) {
 
 func Err(who WHO, v ...any) {
 	l := LOG{
-		Who:     string(who),
+		Who:     who,
 		What:    LOG_WHAT_ERROR,
 		When:    time.Now(),
 		Content: fmt.Sprint(v...)}

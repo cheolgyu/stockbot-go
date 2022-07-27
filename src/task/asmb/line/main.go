@@ -7,14 +7,13 @@ import (
 )
 
 func main() {
-	bp_run := bound.BoundRun{}
-	bp_run.SetCountry()
-	bp_run.Who = string(mlog.LineBound)
-	bp_run.BoundRun()
+	line_bound := bound.LineBound{}
+	line_bound.BaseRunStart(mlog.LineBound)
+	line_bound.EXE()
+	line_bound.BaseRunEnd()
 
-	mlog.Info(mlog.LineBound, "end")
-	mlog.Info(mlog.LineYmxb, "start")
-	ymxb.Run()
-	mlog.Info(mlog.LineYmxb, "end")
-
+	line_ymxb := ymxb.LineYmxb{}
+	line_ymxb.BaseRunStart(mlog.LineYmxb)
+	line_ymxb.EXE()
+	line_ymxb.BaseRunEnd()
 }

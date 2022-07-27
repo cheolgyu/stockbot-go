@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
@@ -25,21 +26,6 @@ var collectionPrice *mongo.Collection
 //custom := now.Format("2006-01-02 15:04:05")
 const PRICE_DATE_FORMAT = "20060102"
 
-func delete_us_prices(client *mongo.Client) {
-	log.Println("delete_us_prices() start")
-	coll := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
-
-	code := doc.GetCodes(client, model.US)
-	for _, v := range code {
-		_, err := coll.DeleteMany(context.TODO(), bson.M{"code": v.Code})
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	log.Println("delete_us_prices() end")
-}
-
 func init() {
 
 	mlog.Info(mlog.Fetch, "start price/price.go init")
@@ -54,12 +40,15 @@ type CrawlingPrice interface {
 	GetResult(downlad bool) ([]model.PriceMarket, error)
 }
 
-//key:code, value:last_price_date
-var startDate map[string]string
-var endDate string
-var Download bool
+type FetchPrice struct {
+	base.Run
 
-type RunCode struct {
+	//key:code, value:last_price_date
+	startDate map[string]string
+	endDate   string
+}
+
+type runCode struct {
 	code     model.Code
 	download CrawlingPrice
 }
@@ -69,40 +58,39 @@ type RunCode struct {
 2. 종목코드로 가격데이터 다운로드
 3. 가격데이터 저장 및 pub.note 마지막가격일자 갱신
 */
-func Run(country model.Country, download bool) {
+func (o *FetchPrice) EXE() {
 	//	delete_us_prices(client)
-	Download = download
-	startDate, endDate = startEnd()
+	o.startDate, o.endDate = startEnd()
 
-	run_country(country)
+	o.run_country()
 
 	defer client.Disconnect(ctx)
 
 }
 
-func run_country(country model.Country) {
+func (o *FetchPrice) run_country() {
 
-	code := doc.GetCodes(client, country)
-	code = append(code, doc.GetCodesMarket(client, country)...)
+	code := doc.GetCodes(client, o.Country)
+	code = append(code, doc.GetCodesMarket(client, o.Country)...)
 
 	for _, v := range code {
-		run_code := RunCode{code: v}
+		run_code := runCode{code: v}
 
-		switch country {
+		switch o.Country {
 		case model.KR:
 			run_code.download = &kr_price.NaverChart{
-				StartDate: startDate[run_code.code.Code],
-				EndDate:   endDate,
+				StartDate: o.startDate[run_code.code.Code],
+				EndDate:   o.endDate,
 				Code:      v,
 			}
 		case model.US:
 			run_code.download = &us_price.RequestNasdaqCom{
-				StartDate: startDate[run_code.code.Code],
+				StartDate: o.startDate[run_code.code.Code],
 				Code:      v,
 			}
 		}
 
-		list, err := run_code.download.GetResult(Download)
+		list, err := run_code.download.GetResult(o.Download)
 		if err != nil {
 			mlog.Err(mlog.Fetch, err)
 			log.Panic(err)
@@ -123,7 +111,7 @@ func run_country(country model.Country) {
 
 	}
 
-	doc.UpdateNoteOne(doc.GetNoteField(country, doc.FETCH_PRICE_UPDATE))
+	doc.UpdateNoteOne(doc.GetNoteField(o.Country, doc.FETCH_PRICE_UPDATE))
 }
 
 //return (key:code value:20220725, 20220725 )
@@ -163,4 +151,19 @@ func startEnd() (map[string]string, string) {
 
 	endDate := time.Now().Format(PRICE_DATE_FORMAT)
 	return startDate, endDate
+}
+
+func delete_us_prices(client *mongo.Client) {
+	log.Println("delete_us_prices() start")
+	coll := client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
+
+	code := doc.GetCodes(client, model.US)
+	for _, v := range code {
+		_, err := coll.DeleteMany(context.TODO(), bson.M{"code": v.Code})
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	log.Println("delete_us_prices() end")
 }

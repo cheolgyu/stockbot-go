@@ -9,16 +9,29 @@ import (
 	"github.com/cheolgyu/stockbot/src/common/model"
 )
 
+type RunEXE interface {
+	EXE()
+}
 type Run struct {
 	Download bool
 	model.Country
 	mlog.LOG
 }
 
-func (o *Run) Start() {
+func (o *Run) BaseRunStart(mlog.WHO) {
+	o.LogStart()
+	o.SetCountry()
+}
+
+func (o *Run) BaseRunEnd() {
+	// updated notice value
+	o.LogEnd()
+}
+
+func (o *Run) LogStart() {
 	o.Info(o.Country, ",Start")
 }
-func (o *Run) End() {
+func (o *Run) LogEnd() {
 	o.Info(o.Country, ",End")
 }
 

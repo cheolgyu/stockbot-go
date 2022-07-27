@@ -4,12 +4,17 @@ import (
 	"context"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	kr_company "github.com/cheolgyu/stockbot/src/fetch/country/kr/company"
 	us_company "github.com/cheolgyu/stockbot/src/fetch/country/us/company"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type FetchCompany struct {
+	base.Run
+}
 
 type Crawling interface {
 	Request()
@@ -18,27 +23,27 @@ type Crawling interface {
 
 var client *mongo.Client
 
-func Run(country model.Country, download bool) {
+func (o *FetchCompany) EXE() {
 
 	client, _ = common.Connect()
 	defer client.Disconnect(context.TODO())
 
-	current := SelectMapCompany(client, country)
+	current := SelectMapCompany(client, o.Country)
 
 	var crawling Crawling
-	switch country {
+	switch o.Country {
 	case model.KR:
-		crawling = &kr_company.Req_krx{Download: download}
+		crawling = &kr_company.Req_krx{Download: o.Download}
 	case model.US:
-		crawling = &us_company.NasdaqCom{Download: download}
+		crawling = &us_company.NasdaqCom{Download: o.Download}
 	}
 
 	crawling.Request()
 	incoming := crawling.GetCompany()
-	merge_list := merge(country, current, incoming)
+	merge_list := merge(o.Country, current, incoming)
 
 	Insert(client, merge_list)
-	doc.UpdateNoteOne(doc.GetNoteField(country, doc.FETCH_PRICE_UPDATE))
+	doc.UpdateNoteOne(doc.GetNoteField(o.Country, doc.FETCH_PRICE_UPDATE))
 }
 
 func merge(country model.Country, current map[string]model.Company, incoming []model.Company) []model.Company {

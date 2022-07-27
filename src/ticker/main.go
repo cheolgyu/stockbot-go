@@ -12,6 +12,7 @@ import (
 )
 
 var marekts []MarketInfo
+var command_arr = []string{"./fetch", "./asmb_line", "./asmb_agg"}
 
 func init() {
 	set_markets()
@@ -45,7 +46,7 @@ func main() {
 		}
 		fmt.Println(string(o))
 
-		exec_kr()
+		exec_cmd(model.KR)
 	} else {
 		m := ment{}
 		m.start()
@@ -119,23 +120,15 @@ type MarketInfo struct {
 }
 
 func start(c model.Country) {
-	switch c {
-	case model.KR:
-		exec_kr()
-	case model.US:
-		exec_us()
-	}
+	exec_cmd(c)
 }
-func exec_kr() {
-	mlog.Info(mlog.Ticker, "exec_kr")
-	//회사정보
-	command("./fetch")
-	//가격정보
-	command("./asmb_line")
-	//가격정보	bound
-	//가격정보	bound	y=xm+b
-	command("./asmb_agg")
-	//가격정보	agg_vol
+
+func exec_cmd(country model.Country) {
+	mlog.Info(mlog.Ticker, "exec_cmd:", string(country))
+	for _, v := range command_arr {
+		cmd := fmt.Sprintf(v + " country=" + string(country))
+		command(cmd)
+	}
 
 }
 func command(name string) {
@@ -145,7 +138,4 @@ func command(name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-func exec_us() {
-	mlog.Info(mlog.Ticker, "exec_us")
 }
