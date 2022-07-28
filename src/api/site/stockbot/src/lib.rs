@@ -10,10 +10,10 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 extern {
-    fn alert(s: &str);
+    fn alert(s: &str);  
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, stockbot!");
+pub fn greet(name: &str) {
+    alert(&format!("Hello, stockbot{}!", name));
 }

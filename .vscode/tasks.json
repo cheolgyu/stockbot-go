@@ -107,6 +107,32 @@
                 "kind": "none",
                 "isDefault": true
             }
+        },
+        {
+            "label": "build wasm-pack",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/src/api/site/stockbot"
+            },
+            "command": "wasm-pack build",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "run site/stockbot",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/src/api/site/stockbot/www"
+            },
+            "command": "npm run start",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            }
         }
     ]
 }
