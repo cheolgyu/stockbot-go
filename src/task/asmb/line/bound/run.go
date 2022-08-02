@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/model"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,14 +20,16 @@ func init() {
 	price_collection = client.Database(doc.DB_DATA).Collection(doc.DB_DATA_COLL_PRICE)
 }
 
-type Run struct {
+type LineBound struct {
 	code []model.Code
+	base.Run
 }
 
-func (o *Run) Run() {
+func (o *LineBound) EXE() {
+
 	defer client.Disconnect(context.TODO())
 
-	o.code = doc.GetCodes(client, model.KR)
+	o.code = doc.GetCodes(client, o.Country)
 	for _, v := range o.code {
 
 		for _, v2 := range model.PriceTypes_arr {
@@ -44,4 +47,5 @@ func (o *Run) Run() {
 
 		}
 	}
+
 }

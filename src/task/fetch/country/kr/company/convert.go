@@ -6,52 +6,26 @@ import (
 	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
 	"github.com/tealeg/xlsx"
 )
 
+const XLSX_SPLIT = "!,_"
+
 type Convert struct {
-	Old map[string]model.Company
+	List map[string]model.Company
 }
 
 func (o *Convert) Run() {
+	o.List = make(map[string]model.Company)
+
 	o.run_detail()
 	o.run_state()
-}
 
-func (o *Convert) update(upsert_cmp model.Company, converting_detail bool) {
-	om, exist := o.Old[upsert_cmp.Code.Code]
-
-	if exist {
-		if converting_detail {
-			om.Detail = upsert_cmp.Detail
-		} else {
-			om.State = upsert_cmp.State
-		}
-	} else {
-		//new code
-		if converting_detail {
-			om = upsert_cmp
-			om.Country = model.KR
-		} else {
-			//detail 파일에는 있고 state 파일에만 있는 코드 등장
-			panic("detail 파일에는 있고 state 파일에만 있는 코드 등장")
-		}
-
-	}
-
-	if converting_detail {
-		om.Detail = upsert_cmp.Detail
-	} else {
-		om.State = upsert_cmp.State
-	}
-
-	o.Old[upsert_cmp.Code.Code] = om
 }
 
 func (o *Convert) run_state() {
 
-	xlFile, err := xlsx.OpenFile(config.DOWNLOAD_COMPANY_STATE)
+	xlFile, err := xlsx.OpenFile(FILE_COMPANY_STATE)
 	if err != nil {
 		log.Fatalln("run_state 오류발생", err)
 	}
@@ -62,13 +36,15 @@ func (o *Convert) run_state() {
 		row := sheet.Row(i)
 		_, content := rowGet(row)
 		state := stringToCompanyState(content)
-		o.update(state, false)
+		tmp := o.List[state.Code.Code]
+		tmp.State = state.State
+		o.List[state.Code.Code] = tmp
 	}
 }
 
 func (o *Convert) run_detail() {
 
-	xlFile, err := xlsx.OpenFile(config.DOWNLOAD_COMPANY_DETAIL)
+	xlFile, err := xlsx.OpenFile(FILE_COMPANY_DETAIL)
 	if err != nil {
 		log.Fatalln("run_detail 오류발생", err)
 	}
@@ -79,14 +55,14 @@ func (o *Convert) run_detail() {
 		row := sheet.Row(i)
 		_, content := rowGet(row)
 		detail := stringToCompanyDetail(content)
-		o.update(detail, true)
+		o.List[detail.Code.Code] = detail
 	}
 }
 
 func rowGet(row *xlsx.Row) (string, string) {
 	txt_replace := strings.NewReplacer("'", " ")
 
-	str := fmt.Sprintf("%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s"+config.XLSX_SPLIT+"%s",
+	str := fmt.Sprintf("%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s"+XLSX_SPLIT+"%s",
 		txt_replace.Replace(row.Cells[0].String()),
 		txt_replace.Replace(row.Cells[1].String()),
 		txt_replace.Replace(row.Cells[2].String()),
@@ -105,7 +81,7 @@ func rowGet(row *xlsx.Row) (string, string) {
 }
 
 func stringToCompanyDetail(str string) model.Company {
-	arr := strings.Split(str, config.XLSX_SPLIT)
+	arr := strings.Split(str, XLSX_SPLIT)
 
 	cmp := model.Company{}
 
@@ -136,7 +112,7 @@ func stringToCompanyState(str string) model.Company {
 
 	ic := model.Company{}
 	o := model.CompanyState{}
-	arr := strings.Split(str, config.XLSX_SPLIT)
+	arr := strings.Split(str, XLSX_SPLIT)
 
 	txt_replace := strings.NewReplacer("'", " ")
 

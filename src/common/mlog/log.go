@@ -17,13 +17,23 @@ func send(inp LOG) {
 }
 
 type LOG struct {
-	Who     string
+	Who     WHO
 	What    string
 	How     string
 	HowWhat string `bson:"how_what"  json:"how_what" `
 	Content interface{}
 	When    time.Time
 	Where   string
+}
+
+func (o *LOG) Info(v ...any) {
+	l := LOG{
+		Who:     o.Who,
+		What:    LOG_WHAT_INFO,
+		When:    time.Now(),
+		Content: fmt.Sprint(v...)}
+
+	send(l)
 }
 
 const LOG_WHAT_INFO = "info"
@@ -34,11 +44,13 @@ const LOG_HOW_WHAT_END = "end"
 type WHO string
 
 const (
-	Fetch     WHO = "fetch"
-	AggVol    WHO = "agg_vol"
-	LineBound WHO = "line_bound"
-	LineYmxb  WHO = "line_ymxb"
-	Ticker    WHO = "ticker"
+	Fetch        WHO = "fetch"
+	FetchCompany WHO = "fetch_company"
+	FetchPrice   WHO = "fetch_price"
+	AggVol       WHO = "agg_vol"
+	LineBound    WHO = "line_bound"
+	LineYmxb     WHO = "line_ymxb"
+	Ticker       WHO = "ticker"
 )
 
 var WaitLog sync.WaitGroup
@@ -49,7 +61,7 @@ func init() {
 }
 func Info(who WHO, v ...any) {
 	l := LOG{
-		Who:     string(who),
+		Who:     who,
 		What:    LOG_WHAT_INFO,
 		When:    time.Now(),
 		Content: fmt.Sprint(v...)}
@@ -59,7 +71,7 @@ func Info(who WHO, v ...any) {
 
 func Err(who WHO, v ...any) {
 	l := LOG{
-		Who:     string(who),
+		Who:     who,
 		What:    LOG_WHAT_ERROR,
 		When:    time.Now(),
 		Content: fmt.Sprint(v...)}
@@ -73,7 +85,7 @@ loop:
 		case r := <-resp_ch:
 			log.Println(r.StatusCode)
 			if r.StatusCode == 200 {
-				log.Println("log요청.상태코드 정상")
+				//log.Println("log요청.상태코드 정상")
 			} else {
 				log.Println("log요청.상태코드 !정상=", r.StatusCode)
 			}

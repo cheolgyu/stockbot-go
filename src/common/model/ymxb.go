@@ -5,7 +5,7 @@ import (
 )
 
 type Unit_quote struct {
-	MarketType
+	Exchange
 	Tick  int
 	Price int `bson:"price"`
 }

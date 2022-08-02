@@ -57,16 +57,16 @@ func kr_kospi() []model.Unit_quote {
 
 		if save {
 			list = append(list, model.Unit_quote{
-				MarketType: model.KOSPI,
-				Tick:       tick,
-				Price:      i,
+				Exchange: model.KOSPI,
+				Tick:     tick,
+				Price:    i,
 			})
 			tick++
 		}
 	}
 	return list
 }
-func kr_kosdaq_konex(market model.MarketType) []model.Unit_quote {
+func kr_kosdaq_konex(market model.Exchange) []model.Unit_quote {
 	var list []model.Unit_quote
 	count := 5999999
 	tick := 1
@@ -91,9 +91,9 @@ func kr_kosdaq_konex(market model.MarketType) []model.Unit_quote {
 
 		if save {
 			list = append(list, model.Unit_quote{
-				MarketType: market,
-				Tick:       tick,
-				Price:      i,
+				Exchange: market,
+				Tick:     tick,
+				Price:    i,
 			})
 			tick++
 		}

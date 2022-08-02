@@ -13,12 +13,12 @@ import (
 	"strings"
 
 	"github.com/cheolgyu/stockbot/src/common/model"
-	"github.com/cheolgyu/stockbot/src/fetch/kr/config"
+	"github.com/cheolgyu/stockbot/src/fetch/file"
 )
 
-type naverChart struct {
-	startDate string
-	endDate   string
+type NaverChart struct {
+	StartDate string
+	EndDate   string
 	model.Code
 
 	url      string
@@ -26,28 +26,31 @@ type naverChart struct {
 	Openings map[int]int
 }
 
-func (o *naverChart) ready() {
-	// if o.Code.Code.Code_type == config.Config["stock"] {
-	// 	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
-	// } else if o.Code.Code.Code_type == config.Config["market"] {
-	// 	o.fnm = config.DOWNLOAD_DIR_MARKET + o.Code.Code
-	// }
-	o.fnm = config.DOWNLOAD_DIR_PRICE + o.Code.Code
+const PRICE_DEFAULT_START_DATE = "19560303"
+const URL_PRICE = "https://api.finance.naver.com/siseJson.naver?symbol=%s&requestType=1&startTime=%s&endTime=%s&timeframe=day"
+const FILE_DIR_PRICE = file.FILE_DIR + "/kr/price/"
+const FILE_DIR_MARKET = file.FILE_DIR + "/kr/market/"
 
-	if o.startDate == "" {
-		o.startDate = config.PRICE_DEFAULT_START_DATE
+func (o *NaverChart) ready() {
+
+	file.Mkdir([]string{FILE_DIR_PRICE, FILE_DIR_MARKET})
+
+	o.fnm = FILE_DIR_PRICE + o.Code.Code
+
+	if o.StartDate == "" {
+		o.StartDate = PRICE_DEFAULT_START_DATE
 	}
 
-	o.url = fmt.Sprintf(config.DOWNLOAD_URL_PRICE, o.Code.Code, o.startDate, o.endDate)
+	o.url = fmt.Sprintf(URL_PRICE, o.Code.Code, o.StartDate, o.EndDate)
 	o.Openings = make(map[int]int)
 
 }
 
-func (o *naverChart) Run() ([]model.PriceMarket, error) {
+func (o *NaverChart) GetResult(downlad bool) ([]model.PriceMarket, error) {
 	var err error = nil
 
 	o.ready()
-	if config.DownloadPrice {
+	if downlad {
 		err_down := o.Download()
 		if err_down != nil {
 			log.Fatalln(err_down)
@@ -59,7 +62,7 @@ func (o *naverChart) Run() ([]model.PriceMarket, error) {
 	return res, err
 }
 
-func (o *naverChart) Parse() ([]model.PriceMarket, error) {
+func (o *NaverChart) Parse() ([]model.PriceMarket, error) {
 	var res []model.PriceMarket
 
 	file, err := os.Open(o.fnm)
@@ -117,7 +120,7 @@ func (o *naverChart) Parse() ([]model.PriceMarket, error) {
 
 }
 
-func (o *naverChart) Download() error {
+func (o *NaverChart) Download() error {
 	req, err := http.NewRequest("GET", o.url, nil)
 	if err != nil {
 		log.Println("Download NewRequest 에러")
@@ -174,35 +177,11 @@ func stringToPrice(code string, str string) model.PriceMarket {
 		panic(err)
 	}
 
-	if res, err := strconv.ParseFloat(arr[1], 32); err == nil {
-		p.OP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[2], 32); err == nil {
-		p.HP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[3], 32); err == nil {
-		p.LP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := strconv.ParseFloat(arr[4], 32); err == nil {
-		p.CP = float32(res)
-	} else if err != nil {
-		panic(err)
-	}
-
-	if res, err := parseUint(arr[5]); err == nil {
-		p.Vol = res
-	} else if err != nil {
-		panic(err)
-	}
+	p.OP = model.ParsePrice(arr[1])
+	p.HP = model.ParsePrice(arr[2])
+	p.LP = model.ParsePrice(arr[3])
+	p.CP = model.ParsePrice(arr[4])
+	p.Vol = model.ParseVol(arr[5])
 
 	str_fr := strings.Replace(arr[6], ",", "", -1)
 	if str_fr == "" {

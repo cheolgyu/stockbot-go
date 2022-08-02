@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Market struct {
@@ -13,7 +15,6 @@ type Market struct {
 	Country
 	UpdatedMarketAt int `bson:"updated_market_at"`
 }
-type MarketType int
 
 var Loc *time.Location
 
@@ -25,52 +26,55 @@ func init() {
 	Loc = loc
 }
 
-const (
+type Exchange int
 
+const (
+	/*
+		한국
+	*/
 	//코스피
-	KOSPI MarketType = iota
+	KOSPI Exchange = iota
 	//코스닥
-	KOSDAQ MarketType = iota
+	KOSDAQ
 	//코넥스
-	KONEX MarketType = iota
+	KONEX
+	/*
+		미국
+	*/
+	//나스닥
+	NASDAQ
+	//뉴욕증권거래소
+	NYSE
+	//아멕스(아메리칸 익스프레스)
+	AMEX
 )
 
-// key:MarketType, value:Code
-var MarketType_map = map[MarketType]Code{
-	KOSPI:  Code{"KOSPI", "코스피"},
-	KOSDAQ: Code{"KOSDAQ", "코스닥"},
-	KONEX:  Code{"KONEX", "코넥스"},
-}
+var Exchanges = map[Country]map[Exchange]Code{
+	KR: {
+		KOSPI:  {"KOSPI", "코스피"},
+		KOSDAQ: {"KOSDAQ", "코스닥"},
+		KONEX:  {"KONEX", "코넥스"},
+	},
+	US: {
+		NASDAQ: {"NASDAQ", "나스닥"},
+		NYSE:   {"NYSE", "뉴욕증권거래소"},
+		AMEX:   {"AMEX", "아멕스"},
+	}}
 
-var MarketType_arr = [...]MarketType{
-	KOSPI,
-	KOSDAQ,
-	KONEX,
-}
-var MarketType_code_String = [...]string{
-	"KOSPI",
-	"KOSDAQ",
-	"KONEX",
-}
-var MarketType_name_String = [...]string{
-	"코스피",
-	"코스닥",
-	"코넥스",
-}
-
-func String2Market(str string) (MarketType, error) {
-	up := strings.ToUpper(str)
-	ii := -10
-	for i, v := range MarketType_code_String {
-		if v == up {
-			ii = i
-
+func ConvertExchanges(country Country, code string) (Exchange, error) {
+	upcode := strings.ToUpper(code)
+	var key Exchange
+	for k, v := range Exchanges[country] {
+		if v.Code == upcode {
+			return k, nil
 		}
 	}
-	if ii >= 0 {
-		return MarketType_arr[ii], nil
-	}
-	return MarketType_arr[0], errors.New("알수없는 마켓문자열입니다. " + str)
+	return key, errors.New("알수없는 마켓문자열입니다. " + upcode)
+}
+
+type Price struct {
+	Display string
+	Decimal uint
 }
 
 /*
@@ -83,23 +87,51 @@ func String2Market(str string) (MarketType, error) {
 type PriceMarket struct {
 	Code     string
 	DateInfo `bson:"inline"`
-	OP       float32
-	CP       float32
-	LP       float32
-	HP       float32
+	OP       primitive.Decimal128
+	CP       primitive.Decimal128
+	LP       primitive.Decimal128
+	HP       primitive.Decimal128
 	Vol      int
 	//ForeignerBurnoutRate
 	FBR string
 }
 
+// "3.87" to 3.87
+func ParsePrice(myString string) primitive.Decimal128 {
+	p, err := primitive.ParseDecimal128(myString)
+	if err != nil {
+		panic(err)
+	}
+	return p
+}
+
+func ParseVol(myString string) int {
+
+	s := strings.Replace(myString, ",", "", -1)
+	value, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return value
+
+}
+
 type Country string
 
 const (
+	//전체
+	ALL Country = "all"
 	//한국
 	KR Country = "kr"
 	//미국
 	US Country = "us"
 )
+
+var Countrys = map[string]Country{
+	"kr": KR,
+	"us": US,
+}
 
 type DateInfo struct {
 	Dt      int
@@ -110,6 +142,7 @@ type DateInfo struct {
 	Quarter int
 }
 
+// dt: 20220725
 func NewDateInfo(dt int) DateInfo {
 	o := DateInfo{}
 	o.Dt = dt
@@ -176,8 +209,8 @@ func convert_g4(num int) (int, error) {
 	} else if num < 13 {
 		res = 4
 	} else {
-
-		err = errors.New(fmt.Sprintf(" 분기 변환 오류: %v", num))
+		msg := fmt.Sprintf(" 분기 변환 오류: %d", num)
+		err = errors.New(msg)
 	}
 
 	return res, err

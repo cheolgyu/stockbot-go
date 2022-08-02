@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/cheolgyu/stockbot/src/common"
+	"github.com/cheolgyu/stockbot/src/common/base"
 	"github.com/cheolgyu/stockbot/src/common/doc"
 	"github.com/cheolgyu/stockbot/src/common/mlog"
 	"github.com/cheolgyu/stockbot/src/common/model"
@@ -19,6 +20,10 @@ var client *mongo.Client
 var collection_price *mongo.Collection
 var collection_agg_vol *mongo.Collection
 var collection_agg_vol_sum *mongo.Collection
+
+type AggVol struct {
+	base.Run
+}
 
 /*
 절차
@@ -39,7 +44,7 @@ var collection_agg_vol_sum *mongo.Collection
 	6. 코드별 코드의 전체연도의 기간별 표준편차를 저장한다.
 
 */
-func Run() {
+func (o *AggVol) EXE() {
 	var ctx context.Context
 	client, ctx = common.Connect()
 	defer client.Disconnect(ctx)
@@ -50,7 +55,7 @@ func Run() {
 
 	t := time.Now()
 	cur_year := t.Year()
-	companys := doc.GetCompany(client)
+	companys := doc.GetCompany(client, o.Country)
 
 	bar := progressbar.Default(int64(len(companys)))
 

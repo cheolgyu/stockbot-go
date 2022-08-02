@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
-	mlog.Info(mlog.AggVol, "main start")
-	vol.Run()
+
+	item := vol.AggVol{}
+	item.BaseRunStart(mlog.AggVol)
+	item.EXE()
+	item.BaseRunEnd()
 }
